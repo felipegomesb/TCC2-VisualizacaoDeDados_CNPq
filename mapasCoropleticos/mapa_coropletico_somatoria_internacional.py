@@ -7,9 +7,9 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "codigos/dados/mapa_internacional.txt"
-ARQUIVO_SAIDA_HTML = "codigos/resultados/mapa_coropletico_internacional_somado.html"
-ARQUIVO_SAIDA_PNG = "codigos/resultados/mapa_coropletico_internacional_somado.png"
+ARQUIVO = "dados/mapa_internacional.txt"
+ARQUIVO_SAIDA_HTML = "resultados/mapa_coropletico_internacional_somado.html"
+ARQUIVO_SAIDA_PNG = "resultados/mapa_coropletico_internacional_somado.png"
 
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True

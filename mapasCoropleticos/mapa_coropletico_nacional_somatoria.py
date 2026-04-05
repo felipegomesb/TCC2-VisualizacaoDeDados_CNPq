@@ -9,9 +9,9 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "codigos/dados/mapa_geografico.txt"
-ARQUIVO_SAIDA_HTML = "codigos/resultados/mapa_coropletico_nacional_somado.html"
-ARQUIVO_SAIDA_PNG = "codigos/resultados/mapa_coropletico_nacional_somado.png"
+ARQUIVO = "dados/mapa_geografico.txt"
+ARQUIVO_SAIDA_HTML = "resultados/mapa_coropletico_nacional_somado.html"
+ARQUIVO_SAIDA_PNG = "resultados/mapa_coropletico_nacional_somado.png"
 
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 

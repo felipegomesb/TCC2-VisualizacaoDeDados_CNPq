@@ -13,7 +13,7 @@ USAR_ESCALA_LOG = True
 
 
 
-# CORREÇÕES ISO
+# CORRECOES ISO
 ISO3_FIX = {
     "RFA": "DEU",
     "HOL": "NLD",
@@ -30,7 +30,7 @@ ISO3_FIX = {
     "MBQ": "MOZ",
     "RCA": "CAF",
     "FOR": "TWN",
-    "TAI": "TWN",  
+    "TAI": "TWN",
     "PRG": "PRY",
     "GAN": "GHA",
     "TAN": "TZA",
@@ -39,6 +39,105 @@ ISO3_FIX = {
     "STP": "STP",
     "PTR": "PRI",
     "EAU": "ARE",
+    "EUA": "USA",
+
+    # EUROPA
+    "ALE": "DEU",
+    "ALM": "DEU",
+    "ITA": "ITA",
+    "ESP": "ESP",
+    "POR": "PRT",
+    "FRA": "FRA",
+    "BEL": "BEL",
+    "SUI": "CHE",
+    "AUT": "AUT",
+    "POL": "POL",
+    "HUN": "HUN",
+    "ROM": "ROU",
+    "BUL": "BGR",
+    "GRE": "GRC",
+    "DIN": "DNK",
+    "NOR": "NOR",
+    "FIN": "FIN",
+    "IRL": "IRL",
+    "ESCÓCIA": "GBR",
+
+    # AMÉRICAS
+    "BRA": "BRA",
+    "BR": "BRA",
+    "ARG": "ARG",
+    "MEX": "MEX",
+    "CAN": "CAN",
+    "COL": "COL",
+    "CHI": "CHL",
+    "PER": "PER",
+    "VEN": "VEN",
+    "URU": "URY",
+    "BOL": "BOL",
+    "EQU": "ECU",
+    "PAR": "PRY",
+    "DOM": "DOM",
+    "CUB": "CUB",
+    "HAI": "HTI",
+    "GUA": "GTM",
+    "HON": "HND",
+    "NIC": "NIC",
+    "SAL": "SLV",
+    "PAN": "PAN",
+
+    # ÁSIA
+    "CHN": "CHN",
+    "CHIINA": "CHN",
+    "IND": "IND",
+    "JAP": "JPN",
+    "COR": "KOR",
+    "COREIA": "KOR",
+    "CDN": "PRK", 
+    "VIE": "VNM",
+    "TAI": "TWN",
+    "HKG": "HKG",
+    "MAC": "MAC",
+    "SIN": "SGP",
+    "INDO": "IDN",
+    "MAL": "MYS",
+    "FIL": "PHL",
+    "PAQ": "PAK",
+    "AFG": "AFG",
+    "ARA": "SAU",
+    "SAU": "SAU",
+    "ISR": "ISR",
+    "IRA": "IRN",
+    "IRQ": "IRQ",
+    "TUR": "TUR",
+
+    # ÁFRICA
+    "NIG": "NGA",
+    "EGI": "EGY",
+    "MAR": "MAR",
+    "ALG": "DZA",
+    "TUN": "TUN",
+    "QUEN": "KEN",
+    "UGA": "UGA",
+    "ANG": "AGO",
+    "ZIM": "ZWE",
+    "BOT": "BWA",
+    "NAM": "NAM",
+
+    # OCEANIA
+    "AUS": "AUS",
+    "NZL": "NZL",
+    "NOVA ZELANDIA": "NZL",
+
+    # ORGANIZAÇÕES 
+    "UE": "EUU",   
+    "EUR": "EUU",
+    "OCDE": None,
+    "ONU": None,
+
+     # INDEFINIDOS
+    "NA": None,
+    "N/A": None,
+    "": None,
 }
 
 

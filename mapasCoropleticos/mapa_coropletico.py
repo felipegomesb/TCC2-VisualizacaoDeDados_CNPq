@@ -130,6 +130,9 @@ def main():
     fig.write_html("resultados/mapa_coropletico.html")
 
 
+    
+
+
 
 # RUN
 if __name__ == "__main__":

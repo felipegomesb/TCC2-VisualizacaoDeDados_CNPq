@@ -7,7 +7,7 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "dados/mapa_internacional.txt"
+ARQUIVO = "dados/mapa_internacional_melhorado.txt"
 ARQUIVO_SAIDA_HTML = "resultados/mapa_coropletico_internacional_somado.html"
 ARQUIVO_SAIDA_PNG = "resultados/mapa_coropletico_internacional_somado.png"
 
@@ -42,6 +42,7 @@ ISO3_FIX = {
     "PTR": "PRI",
     "EAU": "ARE",
     "EUA": "USA",
+	"USA": "USA",
 
     # EUROPA
     "ALE": "DEU",
@@ -217,17 +218,22 @@ def criar_figura(df: pd.DataFrame, label: str):
 
 
 def main():
-	df = carregar_dados(ARQUIVO)
-	df, label = preparar_visualizacao(df)
-	fig = criar_figura(df, label)
+    df = carregar_dados(ARQUIVO)
+    df, label = preparar_visualizacao(df)
+    fig = criar_figura(df, label)
 
-	fig.show()
-	fig.write_html(ARQUIVO_SAIDA_HTML)
+    fig.show()
+    fig.write_html(ARQUIVO_SAIDA_HTML)
 
-	try:
-		fig.write_image(ARQUIVO_SAIDA_PNG, width=1400, height=800, scale=2)
-	except Exception:
-		pass
+    # top 10 países
+    top10 = df.nlargest(10, "total")
+    print("Top 10 países por investimento total:")
+    print(top10[["iso_alpha", "total"]].to_string(formatters={"total": "R$ {:,.2f}".format}))
+
+    try:
+        fig.write_image(ARQUIVO_SAIDA_PNG, width=1400, height=800, scale=2)
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

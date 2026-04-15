@@ -128,17 +128,22 @@ def criar_figura(df: pd.DataFrame, geojson: dict, label: str):
 
 
 def main():
+	# TOP 10 ESTADOS
+
 	df = carregar_dados(ARQUIVO)
 	geojson = carregar_geojson(GEOJSON_URL)
 	df, label = preparar_visualizacao(df)
 	fig = criar_figura(df, geojson, label)
 
+	top10 = df.nlargest(27, "total")
+	print("Top 27 estados por investimento total:")
+	print(top10[["uf", "total"]].to_string(formatters={"total": "R$ {:,.2f}".format}))
+
 	fig.show()
 	fig.write_html(ARQUIVO_SAIDA_HTML)
-	try:
-		fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
-	except Exception:
-		pass
+	fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
+
+
 
 
 if __name__ == "__main__":

@@ -214,4 +214,5 @@ fig.update_layout(
 )
 
 fig.show()
+fig.write_html("sankeyplot.html")
 

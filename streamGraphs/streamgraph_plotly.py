@@ -105,8 +105,8 @@ else:
     )
 
 fig.show()
-fig.write_html("codigos/resultados/streamgraph_grande_area_interativo.html")
+fig.write_html("resultados/streamgraph/streamgraph_grande_area_interativo.html")
 
 #usando kaleido para salvar imagem estática
 fig = go.Figure(fig)
-fig.write_image("codigos/resultados/streamgraph_grande_area_interativo.png", engine="kaleido", scale=2)
+fig.write_image("resultados/streamgraph/streamgraph_grande_area_interativo.png", engine="kaleido", scale=2)

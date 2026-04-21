@@ -89,4 +89,4 @@ plt.show()
 
 # salva imagem 
 
-fig.savefig("codigos/resultados/streamgraph_grande_area.png", dpi=300)
+fig.savefig("resultados/streamgraph/streamgraph_grande_area.png", dpi=300)

@@ -6,7 +6,7 @@ import plotly.express as px
 
 # CONFIG
 ARQUIVO = "dados/mapa_internacional_melhorado.txt"
-ARQUIVO_SAIDA_HTML = "resultados/mapa_coropletico_internacional.html"
+ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional.html"
 ANIMAR_POR_ANO = True
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True

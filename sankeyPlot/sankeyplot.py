@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import unicodedata
 
 # ================= CONFIG =================
-ARQUIVO = 'dados/sankeyplot.txt'
+ARQUIVO = 'dados/sankey_pronto.csv'
 
 # ================= LOAD =================
 df = pd.read_csv(ARQUIVO)
@@ -88,6 +88,7 @@ mapa_codigos = {
     "ARC": "Pesquisa - Auxílio à Pesquisa",
     "AED": "Pesquisa - Auxílio à Pesquisa",
     "ADC": "Pesquisa - Auxílio à Pesquisa",
+    "AI": "Pesquisa - Auxílio à Pesquisa",
 
     # Apoio técnico (separado porque é diferente de projeto)
     "AT": "Pesquisa - Apoio Técnico",
@@ -316,5 +317,5 @@ fig.update_layout(
 )
 
 fig.show()
-fig.write_html("resultados\sankeyplot_modalidades_detalhado.html")
+#fig.write_html("resultados\sankeyplot_modalidades_detalhado.html")
 

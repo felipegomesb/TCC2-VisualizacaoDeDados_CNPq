@@ -10,8 +10,10 @@ import plotly.express as px
 
 # CONFIG
 ARQUIVO = "dados/mapa_geografico.txt"
-ARQUIVO_SAIDA_HTML = "resultados/mapa_coropletico_nacional_somado.html"
-ARQUIVO_SAIDA_PNG = "resultados/mapa_coropletico_nacional_somado.png"
+ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.html"
+ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.png"
+ARQUIVO_SAIDA_HTML_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.html"
+ARQUIVO_SAIDA_PNG_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.png"
 
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 
@@ -47,6 +49,36 @@ UF_TO_STATE = {
 	"SP": "Sao Paulo",
 	"SE": "Sergipe",
 	"TO": "Tocantins",
+}
+
+UF_TO_POP = {
+	"AC": 830018,
+	"AL": 3125254,
+	"AP": 733759,
+	"AM": 3941613,
+	"BA": 14136417,
+	"CE": 8794957,
+	"DF": 2817068,
+	"ES": 3833712,
+	"GO": 7056495,
+	"MA": 6775152,
+	"MT": 3658813,
+	"MS": 2757013,
+	"MG": 20538718,
+	"PA": 8116132,
+	"PB": 3974687,
+	"PR": 11444380,
+	"PE": 9058931,
+	"PI": 3269200,
+	"RJ": 16054524,
+	"RN": 3302406,
+	"RS": 10882965,
+	"RO": 1581196,
+	"RR": 636707,
+	"SC": 7609601,
+	"SP": 44420459,
+	"SE": 2209558,
+	"TO": 1511460,
 }
 
 
@@ -105,6 +137,20 @@ def preparar_visualizacao(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 	return df, label
 
 
+def preparar_visualizacao_100mil_hab(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
+	df_per_capita = df.copy()
+	df_per_capita["populacao"] = df_per_capita["uf"].map(UF_TO_POP)
+	df_per_capita = df_per_capita.dropna(subset=["populacao"])
+	df_per_capita["valor_plot"] = (df_per_capita["total"] / df_per_capita["populacao"]) * 100_000
+	label = "Valor por 100 mil habitantes (R$)"
+
+	if USAR_ESCALA_LOG:
+		df_per_capita["valor_plot"] = np.log1p(df_per_capita["valor_plot"])
+		label += " (escala log)"
+
+	return df_per_capita, label
+
+
 def criar_figura(df: pd.DataFrame, geojson: dict, label: str):
 	fig = px.choropleth(
 		df,
@@ -127,6 +173,28 @@ def criar_figura(df: pd.DataFrame, geojson: dict, label: str):
 	return fig
 
 
+def criar_figura_100mil_hab(df: pd.DataFrame, geojson: dict, label: str):
+	fig = px.choropleth(
+		df,
+		geojson=geojson,
+		locations="estado_nome",
+		featureidkey="properties.name",
+		color="valor_plot",
+		color_continuous_scale="YlOrRd",
+		hover_name="uf",
+		hover_data={"estado_nome": False, "valor_plot": ":,.2f", "populacao": ":,.0f"},
+		title="Mapa Coropletico Nacional - Soma de Todos os Anos (normalizado por 100 mil hab)",
+		labels={"valor_plot": "Valor"},
+	)
+
+	fig.update_geos(fitbounds="locations", visible=False)
+	fig.update_layout(
+		margin=dict(l=0, r=0, t=50, b=0),
+		coloraxis_colorbar_title=label,
+	)
+	return fig
+
+
 def main():
 	# TOP 10 ESTADOS
 
@@ -134,6 +202,8 @@ def main():
 	geojson = carregar_geojson(GEOJSON_URL)
 	df, label = preparar_visualizacao(df)
 	fig = criar_figura(df, geojson, label)
+	df_100mil, label_100mil = preparar_visualizacao_100mil_hab(df)
+	fig_100mil = criar_figura_100mil_hab(df_100mil, geojson, label_100mil)
 
 	top10 = df.nlargest(27, "total")
 	print("Top 27 estados por investimento total:")
@@ -142,7 +212,9 @@ def main():
 	fig.show()
 	fig.write_html(ARQUIVO_SAIDA_HTML)
 	fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
-
+	fig_100mil.write_html(ARQUIVO_SAIDA_HTML_100MIL)
+	fig_100mil.write_image(ARQUIVO_SAIDA_PNG_100MIL, width=1200, height=800, scale=2)
+	fig_100mil.show()
 
 
 

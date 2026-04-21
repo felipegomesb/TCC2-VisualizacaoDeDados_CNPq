@@ -10,6 +10,8 @@ import plotly.express as px
 # CONFIG
 ARQUIVO = "dados/mapa_geografico.txt"
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
+ARQUIVO_SAIDA_ABSOLUTO = "resultados/mapas_coropleticos/mapa_coropletico.html"
+ARQUIVO_SAIDA_PER_CAPITA = "resultados/mapas_coropleticos/mapa_coropletico_por_100mil_hab.html"
 
 
 
@@ -90,6 +92,37 @@ def main():
         "TO": "Tocantins",
     }
 
+    # Populacao residente por UF (Censo 2022/IBGE, aproximado para normalizacao)
+    UF_TO_POP = {
+        "AC": 830018,
+        "AL": 3125254,
+        "AP": 733759,
+        "AM": 3941613,
+        "BA": 14136417,
+        "CE": 8794957,
+        "DF": 2817068,
+        "ES": 3833712,
+        "GO": 7056495,
+        "MA": 6775152,
+        "MT": 3658813,
+        "MS": 2757013,
+        "MG": 20538718,
+        "PA": 8116132,
+        "PB": 3974687,
+        "PR": 11444380,
+        "PE": 9058931,
+        "PI": 3269200,
+        "RJ": 16054524,
+        "RN": 3302406,
+        "RS": 10882965,
+        "RO": 1581196,
+        "RR": 636707,
+        "SC": 7609601,
+        "SP": 44420459,
+        "SE": 2209558,
+        "TO": 1511460,
+    }
+
     df["estado_nome"] = df["uf"].map(UF_TO_STATE)
     df = df.dropna(subset=["estado_nome"])
 
@@ -103,6 +136,8 @@ def main():
     
     # MELHORAR ESCALA 
     df["total_milhoes"] = df["total"] / 1_000_000 # POR MILHOES
+    df["populacao"] = df["uf"].map(UF_TO_POP)
+    df["total_por_100mil_hab"] = (df["total"] / df["populacao"]) * 100_000
 
     
     # MAPA
@@ -126,9 +161,31 @@ def main():
         transition_duration=500
     )
 
-    fig.show()
-    fig.write_html("resultados/mapa_coropletico.html")
+    fig_per_capita = px.choropleth(
+        df,
+        geojson=geojson,
+        locations="estado_nome",
+        featureidkey="properties.name",
+        color="total_por_100mil_hab",
+        animation_frame="ano",
+        hover_name="uf",
+        hover_data={"estado_nome": False, "total_por_100mil_hab": ":,.2f", "populacao": ":,.0f"},
+        color_continuous_scale="YlOrRd",
+        title="Investimento do CNPq por Estado (normalizado por 100 mil habitantes)",
+        labels={"total_por_100mil_hab": "R$ por 100 mil hab"},
+    )
 
+    fig_per_capita.update_geos(fitbounds="locations", visible=False)
+    fig_per_capita.update_layout(
+        margin=dict(l=0, r=0, t=50, b=0),
+        transition_duration=500
+    )
+
+    
+    #fig.show()
+    fig.write_html(ARQUIVO_SAIDA_ABSOLUTO)
+    fig_per_capita.write_html(ARQUIVO_SAIDA_PER_CAPITA)
+    fig_per_capita.show()
 
     
 

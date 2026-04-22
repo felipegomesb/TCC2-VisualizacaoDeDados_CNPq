@@ -10,7 +10,7 @@ TOP_N = 6  # quantidade de categorias visíveis
 
 # ================= LOAD =================
 df = pd.read_csv(ARQUIVO)
-df['total'] = pd.to_numeric(df['total'], errors='coerce')
+df['valor'] = pd.to_numeric(df['valor'], errors='coerce')
 df = df.fillna('Não informado')
 
 
@@ -76,13 +76,13 @@ df['categoria'] = df['modalidade'].apply(classificar_modalidade)
 
 # ================= AGREGAÇÃO =================
 df_grouped = (
-    df.groupby(['grande_area', 'categoria'])['total']
+    df.groupby(['grande_area', 'categoria'])['valor']
     .sum()
     .reset_index()
 )
 
 # ================= REDUZ POLUIÇÃO =================
-totais = df_grouped.groupby('categoria')['total'].sum()
+totais = df_grouped.groupby('categoria')['valor'].sum()
 
 top_categorias = totais.sort_values(ascending=False).head(TOP_N).index
 
@@ -92,7 +92,7 @@ df_grouped['categoria'] = df_grouped['categoria'].apply(
 
 # reagrupa após colapsar
 df_grouped = (
-    df_grouped.groupby(['grande_area', 'categoria'])['total']
+    df_grouped.groupby(['grande_area', 'categoria'])['valor']
     .sum()
     .reset_index()
 )
@@ -117,7 +117,7 @@ label_to_index = {label: i for i, label in enumerate(labels)}
 
 source = df_grouped['grande_area'].map(label_to_index)
 target = df_grouped['categoria'].map(label_to_index)
-value = df_grouped['total'].astype(float) / 100
+value = df_grouped['valor'].astype(float) / 100
 
 
 # cor dos links baseada na categoria

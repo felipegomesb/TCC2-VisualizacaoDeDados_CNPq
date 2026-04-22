@@ -317,5 +317,5 @@ fig.update_layout(
 )
 
 fig.show()
-#fig.write_html("resultados\sankeyplot_modalidades_detalhado.html")
+fig.write_html("resultados\sankey\sankeyplot_modalidades_detalhado.html")
 

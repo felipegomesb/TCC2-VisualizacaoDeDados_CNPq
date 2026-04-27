@@ -66,8 +66,8 @@ ISO3_FIX = {
     "ESCÓCIA": "GBR",
 
     # AMÉRICAS
-    "BRA": "BRA",
-    "BR": "BRA",
+    "BRA": None,
+    "BR": None,
     "ARG": "ARG",
     "MEX": "MEX",
     "CAN": "CAN",
@@ -223,7 +223,7 @@ def main():
     fig = criar_figura(df, label)
 
     fig.show()
-    fig.write_html(ARQUIVO_SAIDA_HTML)
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
 
     # top 10 países
     top10 = df.nlargest(10, "total")

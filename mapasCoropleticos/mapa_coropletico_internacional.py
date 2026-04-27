@@ -63,8 +63,8 @@ ISO3_FIX = {
     "ESCÓCIA": "GBR",
 
     # AMÉRICAS
-    "BRA": "BRA",
-    "BR": "BRA",
+    "BRA": None,
+    "BR": None,
     "ARG": "ARG",
     "MEX": "MEX",
     "CAN": "CAN",
@@ -242,7 +242,7 @@ def main():
     fig = criar_figura(df)
 
     fig.show()
-    fig.write_html(ARQUIVO_SAIDA_HTML)
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
 
 
 

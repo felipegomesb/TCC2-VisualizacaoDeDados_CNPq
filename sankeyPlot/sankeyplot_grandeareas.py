@@ -14,16 +14,6 @@ df['total'] = pd.to_numeric(df['total'], errors='coerce')
 df = df.fillna('Não informado')
 
 
-def formatar_ano(valor):
-    if pd.isna(valor):
-        return 'Não informado'
-
-    try:
-        return str(int(valor))
-    except (TypeError, ValueError):
-        return str(valor)
-
-
 # ================= NORMALIZAÇÃO =================
 def normalizar(texto):
     if pd.isna(texto):
@@ -226,13 +216,26 @@ def classificar_modalidade(mod):
 # aplica classificação
 df['categoria'] = df['modalidade'].apply(classificar_modalidade)
 df['ano_referencia'] = pd.to_numeric(df['ano_referencia'], errors='coerce')
-df['ano_referencia_label'] = df['ano_referencia'].apply(formatar_ano)
-df = df[~df['ano_referencia_label'].isin(['206', '2025'])]
+
+def formatar_ano(valor):
+    if pd.isna(valor):
+        return 'Não informado'
+    try:
+        return str(int(valor))
+    except:
+        return str(valor)
+
+
+
+
+df['ano_label'] = df['ano_referencia'].apply(formatar_ano)
+df = df[~df['ano_label'].isin(['206', '2025'])]
 df = df[~df['grande_area'].isin(['Não informado', 'Não se aplica'])]
+
 
 # ================= AGREGAÇÃO =================
 df_grouped = (
-    df.groupby(['ano_referencia_label', 'grande_area', 'categoria'])['total']
+    df.groupby(['grande_area', 'categoria', 'ano_label'])['total']
     .sum()
     .reset_index()
 )
@@ -255,85 +258,67 @@ df_grouped['categoria'] = pd.Categorical(
 df_grouped = df_grouped.sort_values(['categoria', 'total'], ascending=[True, False])
 
 # ================= SANKEY =================
+labels = list(pd.concat([df_grouped['grande_area'], df_grouped['categoria']]).unique())
+label_to_index = {label: i for i, label in enumerate(labels)}
+
+source = df_grouped['grande_area'].map(label_to_index)
+target = df_grouped['categoria'].map(label_to_index)
+value = df_grouped['total'].astype(float)
+
+
 fig = go.Figure()
 
-df_total = (
-    df.groupby(['grande_area', 'categoria'])['total']
-    .sum()
-    .reset_index()
-)
+categorias = df_grouped['categoria'].unique()
 
+# ===== TRACE 0: TODAS AS CATEGORIAS =====
+labels_all = list(pd.concat([df_grouped['grande_area'], df_grouped['categoria']]).unique())
+label_to_index_all = {label: i for i, label in enumerate(labels_all)}
 
-def criar_trace_sankey(df_base):
-    labels = list(pd.concat([df_base['grande_area'], df_base['categoria']]).unique())
-    label_to_index = {label: i for i, label in enumerate(labels)}
+source_all = df_grouped['grande_area'].map(label_to_index_all)
+target_all = df_grouped['categoria'].map(label_to_index_all)
+value_all = df_grouped['total'].astype(float)
 
-    return go.Sankey(
-        node=dict(label=labels),
-        link=dict(
-            source=df_base['grande_area'].map(label_to_index),
-            target=df_base['categoria'].map(label_to_index),
-            value=df_base['total'].astype(float),
-        ),
-        visible=False
-    )
-
-
-anos = (
-    df.loc[df['ano_referencia'].notna(), 'ano_referencia']
-    .drop_duplicates()
-    .sort_values()
-    .map(formatar_ano)
-    .tolist()
-)
-
-if df['ano_referencia'].isna().any():
-    anos.append('Não informado')
-
-# ===== TRACE 0: TODOS OS ANOS =====
-trace_total = criar_trace_sankey(df_total)
-trace_total.visible = True
-fig.add_trace(trace_total)
-
-# ===== TRACES POR ANO =====
-for ano in anos:
-    df_temp = df_grouped[df_grouped['ano_referencia_label'] == ano]
-    df_temp = df_temp.groupby(['grande_area', 'categoria'])['total'].sum().reset_index()
-    fig.add_trace(criar_trace_sankey(df_temp))
-
-# ===== DROPDOWN =====
-buttons = []
-
-# botão "todas"
-visible_all = [True] + [False] * len(anos)
-buttons.append(dict(
-    label="Todos os anos",
-    method="update",
-    args=[{"visible": visible_all}]
+fig.add_trace(go.Sankey(
+    node=dict(label=labels_all),
+    link=dict(source=source_all, target=target_all, value=value_all),
+    visible=True  # começa mostrando tudo
 ))
 
+labels = list(pd.concat([
+    df_grouped['grande_area'],
+    df_grouped['categoria'],
+    df_grouped['ano_label']
+]).unique())
 
+label_to_index = {label: i for i, label in enumerate(labels)}
 
-# botões individuais
-for i, ano in enumerate(anos):
-    visible = [False] * (len(anos) + 1)
-    visible[i + 1] = True  # +1 por causa do "todos"
+# Grande Área → Categoria
+source_1 = df_grouped['grande_area'].map(label_to_index)
+target_1 = df_grouped['categoria'].map(label_to_index)
+value_1  = df_grouped['total']
 
-    buttons.append(dict(
-        label=ano,
-        method="update",
-        args=[{"visible": visible}]
-    ))
+# Categoria → Ano
+source_2 = df_grouped['categoria'].map(label_to_index)
+target_2 = df_grouped['ano_label'].map(label_to_index)
+value_2  = df_grouped['total']
 
-fig.update_layout(
-    updatemenus=[dict(
-        buttons=buttons,
-        direction="down",
-        showactive=True
-    )],
-    title="Investimento por Grande Área → Categoria por ano_referencia"
-)
+source = pd.concat([source_1, source_2])
+target = pd.concat([target_1, target_2])
+value  = pd.concat([value_1, value_2])
+
+fig = go.Figure(go.Sankey(
+    node=dict(label=labels),
+    link=dict(
+        source=source,
+        target=target,
+        value=value
+    )
+))
+
+fig.update_layout(title="Grande Área → Categoria → Ano")
 
 fig.show()
+
+
 #fig.write_html("resultados\sankey\sankeyplot_modalidades_detalhado.html")
 

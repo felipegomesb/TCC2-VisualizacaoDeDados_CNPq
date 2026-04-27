@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 
 # ================= CONFIG =================
-ARQUIVO_ENTRADA = 'dados/cnpqTcc.txt'
-ARQUIVO_LIMPO = 'dados/cnpqTcc_limpo.csv'
-ARQUIVO_AGREGADO = 'dados/sankey_pronto.csv'
+ARQUIVO_ENTRADA = 'dados/cnpqTcc.parquet'
+ARQUIVO_AGREGADO = 'dados/sankey_pronto.parquet'
 
 
 # ================= FUNÇÃO DE LIMPEZA =================
@@ -42,7 +41,7 @@ def parse_valor(valor):
 
 
 # ================= LOAD =================
-df = pd.read_csv(ARQUIVO_ENTRADA)
+df = pd.read_parquet(ARQUIVO_ENTRADA)
 
 print("Linhas carregadas:", len(df))
 
@@ -73,20 +72,14 @@ print(df['valor_numeric'].sum())
 # ================= SUBSTITUI COLUNA =================
 df['total'] = df['valor_numeric']
 
-
-# ================= SALVA BASE LIMPA =================
-df.to_csv(ARQUIVO_LIMPO, index=False)
-print(f"\nArquivo limpo salvo em: {ARQUIVO_LIMPO}")
-
-
 # ================= AGREGAÇÃO (Sankey) =================
 df_grouped = (
-    df.groupby(['grande_area', 'modalidade', 'linha_de_fomento'])['total']
+    df.groupby(['grande_area', 'modalidade', 'linha_de_fomento', 'ano_referencia'])['total']
     .sum()
     .reset_index()
 )
 
-df_grouped.to_csv(ARQUIVO_AGREGADO, index=False)
+df_grouped.to_parquet(ARQUIVO_AGREGADO, index=False)
 print(f"Arquivo agregado salvo em: {ARQUIVO_AGREGADO}")
 
 

@@ -28,7 +28,7 @@ missing_info = missing_info[missing_info['Valores Ausentes'] > 0].sort_values(by
 print('\nValores ausentes por coluna (e suas porcentagens):')
 print(missing_info.to_string())
 
-q = df['valor_pago'].quantile(1 - 0.01)
+q = df['valor_pago'].quantile(0.95)
 
 # Filtrar dados
 filtered_prices = df[df['valor_pago'] <= q]['valor_pago']
@@ -41,4 +41,17 @@ plt.xlabel('Preço')
 plt.ylabel('Contagem')
 
 plt.tight_layout()
+#plt.show()
+
+
+# DISTRIBUIÇÃO DE VALORES EM MODALIDADE
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data=df, x='modalidade', bins=30, kde=False)
+plt.title('Distribuição de Modalidades')
+plt.xlabel('Modalidade')
+plt.ylabel('Contagem')
+plt.tight_layout()
 plt.show()
+
+

@@ -73,10 +73,34 @@ for col in cols_str:
     if col in df.columns:
         df[col] = df[col].astype(str)
 
+cols_para_excluir = [
+    'data_extracao',
+    'cod_modalidade',
+    'id_lattes',
+    'id_2020_ignorar'
+    'acaoppa',
+    'programappa',
+    'cpf',
+    'nome_chamada',
+    'beneficiario',
+    'processo',
+    'data_inicio_processo',
+    'data_termino_processo',
+    'categoria_nivel',
+    'uo',
+    'natureza_de_despesa',
+
+]
+
+df = df.drop(columns=cols_para_excluir, errors='ignore')
+df = df.drop(columns=['id_2020_ignorar','acaoppa'], errors='ignore')
+
+
 #parquet
 
 
 df.to_parquet('dados/cnpqTcc.parquet', engine='pyarrow', index=False)
+
 
 
 

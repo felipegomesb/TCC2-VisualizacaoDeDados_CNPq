@@ -7,8 +7,8 @@ import plotly.graph_objects as go
 
 # CONFIG
 ARQUIVO = "dados/coropletico_internacional.parquet"
-ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional_somado.html"
-ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_somado.png"
+ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional_grandearea.html"
+ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_grandearea.png"
 
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True
@@ -41,7 +41,7 @@ ISO3_FIX = {
     "PTR": "PRI",
     "EAU": "ARE",
     "EUA": "USA",
-	"USA": "USA",
+    "USA": "USA",
 
     # EUROPA
     "ALE": "DEU",
@@ -143,19 +143,19 @@ ISO3_FIX = {
 }
 
 def extrair_iso3(valor_pais: str) -> str | None:
-	if pd.isna(valor_pais):
-		return None
+    if pd.isna(valor_pais):
+        return None
 
-	texto = str(valor_pais).strip().upper()
-	if not texto or "NAO INFORMADA" in texto or texto == "-":
-		return None
+    texto = str(valor_pais).strip().upper()
+    if not texto or "NAO INFORMADA" in texto or texto == "-":
+        return None
 
-	match = re.match(r"^([A-Z]{3})", texto)
-	if not match:
-		return None
+    match = re.match(r"^([A-Z]{3})", texto)
+    if not match:
+        return None
 
-	codigo = match.group(1)
-	return ISO3_FIX.get(codigo, codigo)
+    codigo = match.group(1)
+    return ISO3_FIX.get(codigo, codigo)
 
 
 def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
@@ -181,39 +181,39 @@ def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
 
 
 def preparar_visualizacao(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
-	if ESCALA_MILHOES:
-		df["valor_plot"] = df["total"] / 1_000_000
-		label = "Valor total (R$ milhoes)"
-	else:
-		df["valor_plot"] = df["total"]
-		label = "Valor total"
+    if ESCALA_MILHOES:
+        df["valor_plot"] = df["total"] / 1_000_000
+        label = "Valor total (R$ milhoes)"
+    else:
+        df["valor_plot"] = df["total"]
+        label = "Valor total"
 
-	if USAR_ESCALA_LOG:
-		df["valor_plot"] = np.log1p(df["valor_plot"])
-		label += " (escala log)"
+    if USAR_ESCALA_LOG:
+        df["valor_plot"] = np.log1p(df["valor_plot"])
+        label += " (escala log)"
 
-	return df, label
+    return df, label
 
 
 def criar_figura(df: pd.DataFrame, label: str):
-	fig = px.choropleth(
-		df,
-		locations="iso_alpha",
-		locationmode="ISO-3",
-		color="valor_plot",
-		color_continuous_scale="YlOrRd",
-		projection="natural earth",
-		hover_name="iso_alpha",
-		hover_data={"valor_plot": ":,.2f", "iso_alpha": False},
-		title="Mapa Coropletico Internacional - Soma de Todos os Anos",
-		labels={"valor_plot": "Valor"},
-	)
+    fig = px.choropleth(
+        df,
+        locations="iso_alpha",
+        locationmode="ISO-3",
+        color="valor_plot",
+        color_continuous_scale="YlOrRd",
+        projection="natural earth",
+        hover_name="iso_alpha",
+        hover_data={"valor_plot": ":,.2f", "iso_alpha": False},
+        title="Mapa Coropletico Internacional - Soma de Todos os Anos",
+        labels={"valor_plot": "Valor"},
+    )
 
-	fig.update_layout(
-		margin=dict(l=0, r=0, t=50, b=0),
-		coloraxis_colorbar_title=label
-	)
-	return fig
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=50, b=0),
+        coloraxis_colorbar_title=label
+    )
+    return fig
 
 def criar_mapa(df, label, titulo):
     fig = px.choropleth(
@@ -294,7 +294,8 @@ def main():
     )
 
     fig.show()
+    fig.write_html(ARQUIVO_SAIDA_HTML)
 
 
 if __name__ == "__main__":
-	main()
+    main()

@@ -335,5 +335,5 @@ fig.update_layout(
 )
 
 #fig.show()
-fig.write_html("resultados\sankey\sankeyplot_modalidades_botao_Ano.html")
+fig.write_html("resultados/sankey/sankeyplot_modalidades_botao_Ano.html")
 

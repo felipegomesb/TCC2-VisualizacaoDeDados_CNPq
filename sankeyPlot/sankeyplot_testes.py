@@ -5,12 +5,12 @@ import plotly.graph_objects as go
 import unicodedata
 
 # ================= CONFIG =================
-ARQUIVO = 'dados/sankeyplot.txt'
-TOP_N = 6  # quantidade de categorias visíveis
+ARQUIVO = 'dados/sankey_pronto.parquet'
 
 # ================= LOAD =================
-df = pd.read_csv(ARQUIVO)
-df['valor'] = pd.to_numeric(df['valor'], errors='coerce')
+df = pd.read_parquet(ARQUIVO)
+
+df['total'] = pd.to_numeric(df['total'], errors='coerce')
 df = df.fillna('Não informado')
 
 
@@ -27,89 +27,255 @@ def normalizar(texto):
     return texto
 
 
-# ================= MAPA =================
+# ================= MAPA DE CÓDIGOS =================
 mapa_codigos = {
-    "IC": "Iniciação Científica", "ICJ": "Iniciação Científica",
-    "ITI": "Iniciação Científica", "IT": "Iniciação Científica",
 
-    "GM": "Mestrado",
-    "GD": "Doutorado", "GDE": "Doutorado",
+    # ================= FORMAÇÃO =================
+    # Iniciação
+    "IC": "Formação - Iniciação Científica",
+    "ICJ": "Formação - Iniciação Científica",
+    "ITI": "Formação - Iniciação Científica",
+    "IT": "Formação - Iniciação Científica",
+    "ITC": "Formação - Iniciação Científica",
+    "IEX": "Formação - Iniciação Científica",
 
-    "PD": "Pós-Doutorado", "PDE": "Pós-Doutorado",
-    "PDJ": "Pós-Doutorado", "PDS": "Pós-Doutorado",
+    # Mestrado
+    "GM": "Formação - Mestrado",
+    "MPE": "Formação - Mestrado",
 
-    "PQ": "Produtividade",
+    # Doutorado (Brasil)
+    "GD": "Formação - Doutorado",
 
-    "APQ": "Auxílio à Pesquisa",
+    # ================= MOBILIDADE =================
+    # Doutorado sanduíche / exterior
+    "SWE": "Mobilidade - Exterior",
+    "SWI": "Mobilidade - Exterior",
+    "SWP": "Mobilidade - Exterior",
+    "GDE": "Mobilidade - Exterior",
 
-    "DTI": "Desenvolvimento Tecnológico",
-    "DCR": "Desenvolvimento Tecnológico"
+    # Estágios / visitante / exterior geral
+    "ESN": "Mobilidade - Exterior",
+    "EJR": "Mobilidade - Exterior",
+    "BSP": "Mobilidade - Exterior",
+    "BEP": "Mobilidade - Exterior",
+    "SPE": "Mobilidade - Exterior",
+    "MSP": "Mobilidade - Exterior",
+    "MEP": "Mobilidade - Exterior",
+
+    # ================= CARREIRA CIENTÍFICA =================
+    # Pós-doc
+    "PD": "Carreira - Pós-Doutorado",
+    "PDE": "Carreira - Pós-Doutorado",
+    "PDJ": "Carreira - Pós-Doutorado",
+    "PDS": "Carreira - Pós-Doutorado",
+    "PDI": "Carreira - Pós-Doutorado",
+    "PDT": "Carreira - Pós-Doutorado",
+    "PDP": "Carreira - Pós-Doutorado",
+
+    # Produtividade / pesquisador
+    "PQ": "Carreira - Produtividade",
+    "DT": "Carreira - Produtividade",
+
+    # Fixação / pesquisador visitante
+    "DCR": "Carreira - Fixação de Pesquisador",
+    "RD": "Carreira - Fixação de Pesquisador",
+    "PV": "Carreira - Fixação de Pesquisador",
+    "PVE": "Carreira - Fixação de Pesquisador",
+
+    # ================= PESQUISA =================
+    # Projetos e financiamento direto
+    "APQ": "Pesquisa - Auxílio à Pesquisa",
+    "ARC": "Pesquisa - Auxílio à Pesquisa",
+    "AED": "Pesquisa - Auxílio à Pesquisa",
+    "ADC": "Pesquisa - Auxílio à Pesquisa",
+    "AI": "Pesquisa - Auxílio à Pesquisa",
+
+    # Apoio técnico (separado porque é diferente de projeto)
+    "AT": "Pesquisa - Apoio Técnico",
+    "ATP": "Pesquisa - Apoio Técnico",
+
+    # ================= TECNOLOGIA & INOVAÇÃO =================
+    "DTI": "Tecnologia - Desenvolvimento",
+    "DES": "Tecnologia - Desenvolvimento",
+    "DEJ": "Tecnologia - Desenvolvimento",
+    "DTC": "Tecnologia - Desenvolvimento",
+    "SDT": "Tecnologia - Desenvolvimento",
+    "INT": "Tecnologia - Desenvolvimento",
+    "PIN": "Tecnologia - Desenvolvimento",
+
+    # ================= EVENTOS / DIFUSÃO =================
+    "AVG": "Difusão - Eventos Científicos",
+    "EXP": "Difusão - Extensão",
+    "EV": "Difusão - Visitante",
+    "BEV": "Difusão - Visitante",
+
+    # ================= FALLBACK CONTROLADO =================
+    # (casos que aparecem no dataset mas são raros)
+    "SET": "Outros",
+    "PCI": "Outros",
+    "ACT": "Outros",
+    "BJT": "Outros",
+    "FIX": "Outros",
+    "MAT": "Outros",
+    "MDT": "Outros",
 }
 
 
+# # ================= CLASSIFICAÇÃO =================
+# def classificar_modalidade(mod):
+#     if pd.isna(mod):
+#         return "Não informado"
+
+#     mod_str = str(mod).upper()
+
+#     # extrai código antes do "-"
+#     codigo = mod_str.split(" - ")[0].strip()
+
+#     # 1. tenta pelo código
+#     if codigo in mapa_codigos:
+#         return mapa_codigos[codigo]
+
+#     # 2. fallback por texto normalizado
+#     mod_norm = normalizar(mod_str)
+
+#     if "POS DOUTORADO" in mod_norm:
+#         return "Pós-Doutorado"
+#     elif "DOUTORADO" in mod_norm:
+#         return "Doutorado"
+#     elif "MESTRADO" in mod_norm:
+#         return "Mestrado"
+#     elif "INICIACAO" in mod_norm:
+#         return "Iniciação Científica"
+#     elif "PRODUTIVIDADE" in mod_norm:
+#         return "Produtividade"
+#     elif "DESENVOLVIMENTO" in mod_norm or "TECNOLOGICO" in mod_norm:
+#         return "Desenvolvimento Tecnológico"
+#     elif "APOIO" in mod_norm or "AUXILIO" in mod_norm:
+#         return "Auxílio à Pesquisa"
+
+#     return "Outros"
+
+
+# ================= CLASSIFICAÇÃO =================
 def classificar_modalidade(mod):
     if pd.isna(mod):
         return "Não informado"
 
     mod_str = str(mod).upper()
-    codigo = mod_str.split(" - ")[0].strip()
 
-    if codigo in mapa_codigos:
-        return mapa_codigos[codigo]
+    # extrai código antes do "-"
+    #codigo = mod_str.split(" - ")[0].strip()
 
+    # 1. tenta pelo código
+    #if codigo in mapa_codigos:
+        #return mapa_codigos[codigo]
+
+    # 2. fallback por texto normalizado
     mod_norm = normalizar(mod_str)
 
+    # ===== FORMAÇÃO =====
     if "POS DOUTORADO" in mod_norm:
-        return "Pós-Doutorado"
+        return "Carreira - Pós-Doutorado"
+
     elif "DOUTORADO" in mod_norm:
-        return "Doutorado"
+        # cuidado: pode ser sanduíche/exterior
+        if "EXTERIOR" in mod_norm or "SANDUICHE" in mod_norm:
+            return "Mobilidade - Doutorado - Exterior"
+        return "Formação - Doutorado"
+
     elif "MESTRADO" in mod_norm:
-        return "Mestrado"
+        return "Formação - Mestrado"
+
     elif "INICIACAO" in mod_norm:
-        return "Iniciação Científica"
+        return "Formação - Iniciação Científica"
+
+
+    # ===== CARREIRA =====
+    elif "PRODUTIVIDADE" in mod_norm:
+        return "Carreira - Produtividade"
+
+
+    # ===== TECNOLOGIA =====
+    elif "DESENVOLVIMENTO" in mod_norm or "TECNOLOGICO" in mod_norm:
+        return "Tecnologia - Desenvolvimento"
+
+
+    # ===== PESQUISA =====
+    elif "APOIO" in mod_norm or "AUXILIO" in mod_norm:
+        return "Pesquisa - Auxílio à Pesquisa"
+
+
+    # ===== MOBILIDADE (fallback textual) =====
+    elif "EXTERIOR" in mod_norm or "VISITANTE" in mod_norm:
+        return "Mobilidade - Exterior"
+
 
     return "Outros"
 
 
+# aplica classificação
 df['categoria'] = df['modalidade'].apply(classificar_modalidade)
+df['ano_referencia'] = pd.to_numeric(df['ano_referencia'], errors='coerce')
+
+def formatar_ano(valor):
+    if pd.isna(valor):
+        return 'Não informado'
+    try:
+        return str(int(valor))
+    except:
+        return str(valor)
+
+
+def agrupar_ano(ano):
+     if pd.isna(ano):
+         return 'Não informado'
+
+     ano = int(ano)
+
+     if 2004 <= ano <= 2011:
+         return '2004-2011'
+     elif 2012 <= ano <= 2016:
+         return '2012-2016'
+     elif 2017 <= ano <= 2020:
+         return '2017-2020'
+     elif 2021 <= ano <= 2024:
+         return '2021-2024'
+     else:
+         return 'Fora do recorte'
+
+
+    
+
+
+df['ano_label'] = df['ano_referencia'].apply(agrupar_ano)
+df = df[df['ano_label'] != 'Não informado']
+df = df[df['ano_label'] != 'Fora do recorte']
+df = df[~df['grande_area'].isin(['Não informado', 'Não se aplica'])]
 
 
 # ================= AGREGAÇÃO =================
 df_grouped = (
-    df.groupby(['grande_area', 'categoria'])['valor']
+    df.groupby(['grande_area', 'categoria', 'ano_label'])['total']
     .sum()
     .reset_index()
 )
 
-# ================= REDUZ POLUIÇÃO =================
-totais = df_grouped.groupby('categoria')['valor'].sum()
-
-top_categorias = totais.sort_values(ascending=False).head(TOP_N).index
-
-df_grouped['categoria'] = df_grouped['categoria'].apply(
-    lambda x: x if x in top_categorias else 'Outros'
-)
-
-# reagrupa após colapsar
-df_grouped = (
-    df_grouped.groupby(['grande_area', 'categoria'])['valor']
+ordem_categorias = (
+    df_grouped.groupby('categoria')['total']
     .sum()
-    .reset_index()
+    .sort_values(ascending=False)
+    .index
 )
 
+# aplica ordenação como categoria ordenada
+df_grouped['categoria'] = pd.Categorical(
+    df_grouped['categoria'],
+    categories=ordem_categorias,
+    ordered=True
+)
 
-# ================= CORES =================
-cores = {
-    "Iniciação Científica": "#1f77b4",
-    "Mestrado": "#ff7f0e",
-    "Doutorado": "#2ca02c",
-    "Pós-Doutorado": "#d62728",
-    "Produtividade": "#9467bd",
-    "Auxílio à Pesquisa": "#8c564b",
-    "Desenvolvimento Tecnológico": "#e377c2",
-    "Outros": "#7f7f7f"
-}
-
+# opcional: ordenar também o dataframe
+df_grouped = df_grouped.sort_values(['categoria', 'total'], ascending=[True, False])
 
 # ================= SANKEY =================
 labels = list(pd.concat([df_grouped['grande_area'], df_grouped['categoria']]).unique())
@@ -117,30 +283,97 @@ label_to_index = {label: i for i, label in enumerate(labels)}
 
 source = df_grouped['grande_area'].map(label_to_index)
 target = df_grouped['categoria'].map(label_to_index)
-value = df_grouped['valor'].astype(float) / 100
+value = df_grouped['total'].astype(float)
 
 
-# cor dos links baseada na categoria
-link_colors = df_grouped['categoria'].map(cores)
+fig = go.Figure()
 
-fig = go.Figure(go.Sankey(
-    node=dict(
-        label=labels,
-        pad=20,
-        thickness=20
-    ),
-    link=dict(
-        source=source,
-        target=target,
-        value=value,
-        color=link_colors,
-        hovertemplate='R$ %{value:,.2f} milhões<extra></extra>'
-    )
+categorias = df_grouped['categoria'].unique()
+
+# ===== TRACE 0: TODAS AS CATEGORIAS =====
+labels_all = list(pd.concat([df_grouped['grande_area'], df_grouped['categoria']]).unique())
+label_to_index_all = {label: i for i, label in enumerate(labels_all)}
+
+source_all = df_grouped['grande_area'].map(label_to_index_all)
+target_all = df_grouped['categoria'].map(label_to_index_all)
+value_all = df_grouped['total'].astype(float)
+
+fig.add_trace(go.Sankey(
+    node=dict(label=labels_all),
+    link=dict(source=source_all, target=target_all, value=value_all),
+    visible=True  # começa mostrando tudo
 ))
 
-fig.update_layout(
-    title="Fluxo de Investimentos por Área → Modalidade (Top Categorias)",
-    font_size=12
-)
+labels = list(pd.concat([
+    df_grouped['grande_area'],
+    df_grouped['categoria'],
+    df_grouped['ano_label']
+]).unique())
+
+label_to_index = {label: i for i, label in enumerate(labels)}
+
+# Grande Área → Categoria
+source_1 = df_grouped['grande_area'].map(label_to_index)
+target_1 = df_grouped['categoria'].map(label_to_index)
+value_1  = df_grouped['total']
+
+# Categoria → Ano
+source_2 = df_grouped['categoria'].map(label_to_index)
+target_2 = df_grouped['ano_label'].map(label_to_index)
+value_2  = df_grouped['total']
+
+source = pd.concat([source_1, source_2])
+target = pd.concat([target_1, target_2])
+value  = pd.concat([value_1, value_2])
+
+
+#BOTAO -> FILTRAR POR GRANDE AREA
+
+# build traces: global + one per grande_area
+fig = go.Figure()
+
+# global trace (all grande_areas)
+fig.add_trace(go.Sankey(
+    node=dict(label=labels),
+    link=dict(source=source, target=target, value=value),
+    visible=True
+))
+
+grandes_areas = df_grouped['grande_area'].drop_duplicates().tolist()
+
+for ga in grandes_areas:
+    df_sub = df_grouped[df_grouped['grande_area'] == ga]
+    # build nodes for this subset
+    labels_sub = list(pd.concat([df_sub['grande_area'], df_sub['categoria'], df_sub['ano_label']]).unique())
+    idx = {lab: i for i, lab in enumerate(labels_sub)}
+
+    # links: grande_area -> categoria and categoria -> ano
+    s1 = df_sub['grande_area'].map(idx)
+    t1 = df_sub['categoria'].map(idx)
+    v1 = df_sub['total']
+
+    s2 = df_sub['categoria'].map(idx)
+    t2 = df_sub['ano_label'].map(idx)
+    v2 = df_sub['total']
+
+    s = pd.concat([s1, s2])
+    t = pd.concat([t1, t2])
+    v = pd.concat([v1, v2])
+
+    fig.add_trace(go.Sankey(node=dict(label=labels_sub), link=dict(source=s, target=t, value=v), visible=False))
+
+# dropdown buttons: All + one per grande_area
+buttons = []
+visible_all = [True] + [False] * len(grandes_areas)
+buttons.append(dict(label='Todas as grandes áreas', method='update', args=[{'visible': visible_all}, {'title': 'Grande Área → Categoria → Ano'}]))
+
+for i, ga in enumerate(grandes_areas):
+    vis = [False] * (1 + len(grandes_areas))
+    vis[i + 1] = True
+    buttons.append(dict(label=ga, method='update', args=[{'visible': vis}, {'title': f'Grande Área: {ga} → Categoria → Ano'}]))
+
+fig.update_layout(title='Grande Área → Categoria → Ano', updatemenus=[dict(buttons=buttons, direction='down', showactive=True, x=0.0, y=1.1)])
 
 fig.show()
+#fig.write_html('resultados/sankey/sankeyplot_modalidades_ano.html')
+

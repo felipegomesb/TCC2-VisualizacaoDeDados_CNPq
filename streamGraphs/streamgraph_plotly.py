@@ -6,29 +6,29 @@ import kaleido
 
 # CONFIG
 
-ARQUIVO = "codigos/dados/grande_area_new.txt"
-ANO_INICIO = 2003
-ANO_FIM = 2024
+ARQUIVO = "dados/streamgraph_pronto.parquet"
+ano_referencia_INICIO = 2003
+ano_referencia_FIM = 2024
 TOP_N = 8
 USAR_WOBBLY = True
 
 
 # LEITURA
 
-df = pd.read_csv(ARQUIVO)
+df = pd.read_parquet(ARQUIVO)
 df = df.rename(columns={"grande_area": "Grande_Area"})
 
-df["ano"] = pd.to_numeric(df["ano"], errors="coerce")
+df["ano_referencia"] = pd.to_numeric(df["ano_referencia"], errors="coerce")
 df["total"] = pd.to_numeric(df["total"], errors="coerce")
 
-df = df.dropna(subset=["ano", "Grande_Area", "total"])
-df["ano"] = df["ano"].astype(int)
-df = df[df["ano"].between(ANO_INICIO, ANO_FIM)]
+df = df.dropna(subset=["ano_referencia", "Grande_Area", "total"])
+df["ano_referencia"] = df["ano_referencia"].astype(int)
+df = df[df["ano_referencia"].between(ano_referencia_INICIO, ano_referencia_FIM)]
 
 
 # AGRUPAR (resolve duplicatas)
 
-df_grouped = df.groupby(["ano", "Grande_Area"], as_index=False)["total"].sum()
+df_grouped = df.groupby(["ano_referencia", "Grande_Area"], as_index=False)["total"].sum()
 
 
 # FILTRAR TOP ÁREAS
@@ -42,7 +42,7 @@ df_grouped = df_grouped[df_grouped["Grande_Area"].isin(top)]
 if not USAR_WOBBLY:
     fig = px.area(
         df_grouped,
-        x="ano",
+        x="ano_referencia",
         y="total",
         color="Grande_Area",
         title="Investimento por Grande Área (Interativo)"
@@ -51,7 +51,7 @@ else:
     # Build a centered baseline (streamgraph style) for a wobbly look.
     pivot = (
         df_grouped
-        .pivot(index="ano", columns="Grande_Area", values="total")
+        .pivot(index="ano_referencia", columns="Grande_Area", values="total")
         .fillna(0)
         .sort_index()
     )
@@ -77,7 +77,7 @@ else:
                 line=dict(width=0.5),
                 name=area,
                 legendgroup=area,
-                hovertemplate="Ano=%{x}<br>Valor=%{customdata:,.2f}<extra>" + area + "</extra>",
+                hovertemplate="ano_referencia=%{x}<br>Valor=%{customdata:,.2f}<extra>" + area + "</extra>",
                 customdata=y[i]
             )
         )
@@ -99,14 +99,14 @@ else:
 
     fig.update_layout(
         title="Investimento por Grande Área (Interativo - Wobbly)",
-        xaxis_title="Ano",
+        xaxis_title="ano_referencia",
         yaxis_title="Valor Pago",
         hovermode="x unified"
     )
 
 fig.show()
-fig.write_html("resultados/streamgraph/streamgraph_grande_area_interativo.html")
+#fig.write_html("resultados/streamgraph/streamgraph_grande_area_interativo.html")
 
 #usando kaleido para salvar imagem estática
-fig = go.Figure(fig)
-fig.write_image("resultados/streamgraph/streamgraph_grande_area_interativo.png", engine="kaleido", scale=2)
+#fig = go.Figure(fig)
+#fig.write_image("resultados/streamgraph/streamgraph_grande_area_interativo.png", engine="kaleido", scale=2)

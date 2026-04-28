@@ -188,6 +188,9 @@ def preparar_visualizacao(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
         df["valor_plot"] = df["total"]
         label = "Valor total"
 
+    # keep raw values for display (before log transform) so we can show currency-formatted ticks
+    df["valor_plot_raw"] = df["valor_plot"].copy()
+
     if USAR_ESCALA_LOG:
         df["valor_plot"] = np.log1p(df["valor_plot"])
         label += " (escala log)"
@@ -201,7 +204,7 @@ def criar_figura(df: pd.DataFrame, label: str):
         locations="iso_alpha",
         locationmode="ISO-3",
         color="valor_plot",
-        color_continuous_scale="YlOrRd",
+        color_continuous_scale="Inferno",
         projection="natural earth",
         hover_name="iso_alpha",
         hover_data={"valor_plot": ":,.2f", "iso_alpha": False},
@@ -209,24 +212,56 @@ def criar_figura(df: pd.DataFrame, label: str):
         labels={"valor_plot": "Valor"},
     )
 
+    # ensure trace colorscale is explicitly set (prevents overrides when reusing traces)
+    for tr in fig.data:
+        if hasattr(tr, 'colorscale'):
+            tr.colorscale = "Inferno"
+
     fig.update_layout(
         margin=dict(l=0, r=0, t=50, b=0),
         coloraxis_colorbar_title=label
     )
     return fig
 
-def criar_mapa(df, label, titulo):
+def criar_mapa(df, label):
     fig = px.choropleth(
         df,
         locations="iso_alpha",
         locationmode="ISO-3",
         color="valor_plot",
-        color_continuous_scale="YlOrRd",
+        color_continuous_scale="Inferno",
         projection="natural earth",
         hover_name="iso_alpha",
         hover_data={"valor_plot": ":,.2f", "iso_alpha": False},
-        title=titulo,
+        title="Mapa Coropletico Internacional - Soma de Todos os Anos",
+        labels={"valor_plot": "Valor"},
     )
+
+    # ensure trace colorscale is explicitly set (prevents overrides when reusing traces)
+    for tr in fig.data:
+        if hasattr(tr, 'colorscale'):
+            tr.colorscale = "Inferno"
+
+    # configure colorbar to show currency formatting
+    if USAR_ESCALA_LOG:
+        # ticks must be placed on the transformed (log1p) scale, but display original values
+        raw_min = float(df["valor_plot_raw"].min())
+        raw_max = float(df["valor_plot_raw"].max())
+        if raw_min == raw_max:
+            tick_raw = [raw_min]
+        else:
+            tick_raw = list(np.linspace(raw_min, raw_max, num=5))
+        tickvals = [float(np.log1p(x)) for x in tick_raw]
+        if ESCALA_MILHOES:
+            ticktext = [f"R$ {x:,.2f}M" for x in tick_raw]
+        else:
+            ticktext = [f"R$ {x:,.2f}" for x in tick_raw]
+
+        fig.update_traces(colorbar=dict(title=label, tickvals=tickvals, ticktext=ticktext))
+    else:
+        # linear scale: prefix with R$ and optionally show millions suffix
+        ticksuffix = "M" if ESCALA_MILHOES else ""
+        fig.update_traces(colorbar=dict(title=label, tickprefix="R$ ", ticksuffix=ticksuffix, tickformat=",.2f"))
 
     fig.update_layout(
         margin=dict(l=0, r=0, t=50, b=0),
@@ -245,19 +280,19 @@ def main():
     areas = df["grande_area"].unique()
 
     # ===== TODOS =====
-    df_total = df.groupby("iso_alpha", as_index=False)[["total", "valor_plot"]].sum()
+    df_total = df.groupby("iso_alpha", as_index=False)[["total", "valor_plot", "valor_plot_raw"]].sum()
 
     fig.add_trace(
-        criar_mapa(df_total, label, "Todas as áreas").data[0]
+        criar_mapa(df_total, label).data[0]
     )
 
     # ===== POR ÁREA =====
     for area in areas:
         df_area = df[df["grande_area"] == area]
 
-        df_area = df_area.groupby("iso_alpha", as_index=False)[["total", "valor_plot"]].sum()
+        df_area = df_area.groupby("iso_alpha", as_index=False)[["total", "valor_plot", "valor_plot_raw"]].sum()
 
-        mapa = criar_mapa(df_area, label, area)
+        mapa = criar_mapa(df_area, label)
 
         fig.add_trace(mapa.data[0])
 
@@ -270,7 +305,7 @@ def main():
         label="Todas as áreas",
         method="update",
         args=[{"visible": visible},
-              {"title": "Mapa - Todas as áreas"}]
+              {"title.text": "Mapa Coropletico Internacional - Soma de Todos os Anos"}]
     ))
 
     # botões individuais
@@ -282,14 +317,17 @@ def main():
             label=area,
             method="update",
             args=[{"visible": visible},
-                  {"title": f"Mapa - {area}"}]
+                  {"title.text": f"Mapa Coropletico Internacional - {area}"}]
+            
         ))
 
     fig.update_layout(
+        title_text="Mapa Coropletico Internacional - Soma de Todos os Anos",
+        margin=dict(l=0, r=0, t=50, b=0),
         updatemenus=[dict(
             buttons=buttons,
             direction="down",
-            showactive=True
+            showactive=True,
         )]
     )
 

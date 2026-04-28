@@ -334,6 +334,6 @@ fig.update_layout(
     title="Investimento por Grande Área → Categoria por ano_referencia"
 )
 
-fig.show()
-fig.write_html("resultados\sankey\sankeyplot_modalidades_botaoAno.html")
+#fig.show()
+fig.write_html("resultados\sankey\sankeyplot_modalidades_botao_Ano.html")
 

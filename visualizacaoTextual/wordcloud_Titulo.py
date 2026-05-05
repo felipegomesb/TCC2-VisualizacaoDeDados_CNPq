@@ -3,32 +3,119 @@ import plotly.graph_objs as go
 import pandas as pd
 from collections import Counter
 import re
+import unicodedata
 
 # ================= CONFIG =================
 ARQUIVO_PARQUET = 'dados/cnpqTcc_palavras_chave.parquet'
 STOPWORDS_ARQUIVO = 'dados/stopwords.txt'
-
 # ================= LOAD =================
 df = pd.read_parquet(ARQUIVO_PARQUET)
 
+# ================= Sinonimos =================
+SINONIMOS = {
+    **{termo: 'tecnologia' 
+       for termo in [
+           'tecnologia', 'tecnologias',
+           'tecnologica', 'tecnologicas',
+           'tecnologico', 'tecnologicos',
+           'tech', 'informatica', 'ti'
+       ]},
+    **{termo: 'IC'
+       for termo in [
+           'ic', 'pibic', 'pibiti', 'pivic',
+           'iniciacao', 'cientifica'
+       ]},
+    **{termo: 'saude'
+       for termo in [
+            'saude', 'saúde', 'clinico', 'clínico',
+            'tratamento', 'paciente', 'doenca', 'doença'
+       ]},
+    **{termo: 'meio_ambiente' 
+       for termo in [
+            'ambiental', 'meio ambiente', 'sustentabilidade',
+            'sustentavel', 'ecologia'
+            ]}
+
+}
+
+
+# ================= STOPWORDS =================
+STOPWORDS_EXTRA = {
+    # === genéricas acadêmicas ===
+    'projeto', 'projetos', 'pesquisa', 'pesquisas',
+    'pesquisador', 'pesquisadores',
+    'estudo', 'analise', 'avaliacao',
+    'proposta', 'objetivo', 'objetivos',
+    'metodologia', 'resultado', 'resultados',
+
+    # === estrutura institucional ===
+    'cnpq', 'programa', 'programas',
+    'edital', 'editais',
+    'instituicao', 'instituicoes',
+    'universidade', 'universidades',
+    'departamento', 'centro', 'curso',
+    'instituto', 'federal', 'nacional',
+
+    # === tempo / contexto ===
+    'ano', 'anos', 'mes', 'meses',
+    'periodo', 'inicio', 'fim',
+    'duracao',
+
+    # === financiamento ===
+    'bolsa', 'bolsas', 'bolsista', 'bolsistas',
+    'apoio', 'auxilio', 'financiamento',
+    'fomento', 'recursos', 'valor', 'valores',
+
+    # === estrutura textual ===
+    'atividade', 'atividades',
+    'relatorio', 
+    'informacao',
+
+    # === ensino genérico ===
+    'ensino', 'formacao', 'graduacao',
+
+    # === geográfico ===
+    'brasil', 'estado',
+
+    # === números comuns ===
+    '2022', '2023', '2024'
+}
+
+STOPWORDS = set(STOPWORDS_EXTRA)
+
+
 with open(STOPWORDS_ARQUIVO, 'r', encoding='utf-8') as f:
-    STOPWORDS = set(f.read().splitlines())
+    STOPWORDS.update(f.read().splitlines())
 
 # ================= FUNÇÃO =================
 def extrair_dados_palavras(df_base: pd.DataFrame):
-    text = ' '.join(df_base['titulo_do_projeto'].explode().dropna().tolist())
+    text = ' '.join(df_base['titulo_do_projeto'].dropna().tolist())
     
     text_clean = re.sub(r'[^\w\s]', ' ', text.lower())
     words = text_clean.split()
 
-    words = [w for w in words if w not in STOPWORDS and len(w) > 3]
+    # normaliza ANTES
+    words = [normalizar_token(w) for w in words]
+
+    words = [w for w in words if w not in STOPWORDS]
 
     freq = Counter(words)
 
     df_freq = pd.DataFrame(freq.items(), columns=['palavra', 'freq'])
     df_freq = df_freq.sort_values(by='freq', ascending=False)
 
+
     return df_freq
+
+def normalizar_token(w: str) -> str:
+    # lowercase + remove accents
+    w = w.lower().strip()
+    w = ''.join(
+        c for c in unicodedata.normalize("NFD", w)
+        if unicodedata.category(c) != "Mn"
+    )
+    # apply canonical form if exists
+    return SINONIMOS.get(w, w)
 
 # ================= PREPARAR ÁREAS =================
 grandes_areas = sorted(df['grande_area'].dropna().unique())
@@ -46,6 +133,7 @@ for i, grande_area in enumerate(grandes_areas):
         df_area = df[df['grande_area'] == grande_area]
 
     df_freq = extrair_dados_palavras(df_area)
+
 
     # LIMITA 
     df_freq = df_freq.head(100)

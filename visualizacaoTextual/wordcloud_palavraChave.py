@@ -3,6 +3,7 @@ import plotly.graph_objs as go
 import pandas as pd
 from collections import Counter
 import re
+import unicodedata
 
 # ================= CONFIG =================
 ARQUIVO_PARQUET = 'dados/cnpqTcc_palavras_chave.parquet'
@@ -14,6 +15,92 @@ df = pd.read_parquet(ARQUIVO_PARQUET)
 with open(STOPWORDS_ARQUIVO, 'r', encoding='utf-8') as f:
     STOPWORDS = set(f.read().splitlines())
 
+# SINONIMOS
+
+SINONIMOS = {
+    **{termo: 'tecnologia' 
+       for termo in [
+           'tecnologia', 'tecnologias',
+           'tecnologica', 'tecnologicas',
+           'tecnologico', 'tecnologicos',
+           'tech', 'informatica', 'ti'
+       ]},
+    **{termo: 'IC'
+       for termo in [
+           'ic', 'pibic', 'pibiti', 'pivic',
+           'iniciacao', 'cientifica'
+       ]},
+    **{termo: 'saude'
+       for termo in [
+            'saude', 'saúde', 'clinico', 'clínico',
+            'tratamento', 'paciente', 'doenca', 'doença'
+       ]},
+    **{termo: 'meio_ambiente' 
+       for termo in [
+            'ambiental', 'meio ambiente', 'sustentabilidade',
+            'sustentavel', 'ecologia'
+            ]}
+
+}
+
+
+# ================= STOPWORDS =================
+STOPWORDS_EXTRA = {
+    # === genéricas acadêmicas ===
+    'projeto', 'projetos', 'pesquisa', 'pesquisas',
+    'pesquisador', 'pesquisadores',
+    'estudo', 'analise', 'avaliacao',
+    'proposta', 'objetivo', 'objetivos',
+    'metodologia', 'resultado', 'resultados',
+    'metodo', 'metodos',
+
+    # === sistemas e modelos ===
+    'sistema', 'sistemas', 'modelo', 'modelos',
+    'simulacao', 'simulacoes',
+    'processamento', 'desenvolvimento', 'desenv',
+    'aplicacao', 'aplicacoes', 'ambiente',
+    'base', 'ferramenta', 'ferramentas',
+    'uso', 'utilizacao', 'utilizar', 'usar',
+
+    # === estrutura institucional ===
+    'cnpq', 'programa', 'programas',
+    'edital', 'editais',
+    'instituicao', 'instituicoes',
+    'universidade', 'universidades',
+    'departamento', 'centro', 'curso',
+    'instituto', 'federal', 'nacional',
+
+    # === tempo / contexto ===
+    'ano', 'anos', 'mes', 'meses',
+    'periodo', 'inicio', 'fim',
+    'duracao',
+
+    # === financiamento ===
+    'bolsa', 'bolsas', 'bolsista', 'bolsistas',
+    'apoio', 'auxilio', 'financiamento',
+    'fomento', 'recursos', 'valor', 'valores',
+
+    # === estrutura textual ===
+    'atividade', 'atividades',
+    'relatorio', 
+    'informacao', 'informacoes',
+
+    # === ensino genérico ===
+    'ensino', 'formacao', 'graduacao',
+
+    # === geográfico ===
+    'brasil', 'estado',
+
+    # === números comuns ===
+    '2022', '2023', '2024',
+    
+    # === preposições/conjunções que passam pelo regex ===
+    'e', 'de', 'em', 'para', 'com', 'do', 'dos', 'da', 'das',
+    'um', 'uma', 'uns', 'umas', 'o', 'os', 'a', 'as'
+}
+
+STOPWORDS = set(STOPWORDS_EXTRA)
+
 # ================= FUNÇÃO =================
 def extrair_dados_palavras(df_base: pd.DataFrame):
     text = ' '.join(df_base['palavra_chave'].explode().dropna().tolist())
@@ -21,14 +108,25 @@ def extrair_dados_palavras(df_base: pd.DataFrame):
     text_clean = re.sub(r'[^\w\s]', ' ', text.lower())
     words = text_clean.split()
 
-    words = [w for w in words if w not in STOPWORDS and len(w) > 3]
-
+ 
+    words = [normalizar_token(w) for w in words]
+    words = [w for w in words if w not in STOPWORDS and len(w) > 4]
     freq = Counter(words)
 
     df_freq = pd.DataFrame(freq.items(), columns=['palavra', 'freq'])
     df_freq = df_freq.sort_values(by='freq', ascending=False)
 
+
     return df_freq
+
+def normalizar_token(w: str) -> str:
+    
+    w = w.lower().strip()
+    w = ''.join(
+        c for c in unicodedata.normalize("NFD", w)
+        if unicodedata.category(c) != "Mn"
+    )
+    return SINONIMOS.get(w, w)
 
 # ================= PREPARAR ÁREAS =================
 grandes_areas = sorted(df['grande_area'].dropna().unique())
@@ -47,10 +145,9 @@ for i, grande_area in enumerate(grandes_areas):
 
     df_freq = extrair_dados_palavras(df_area)
 
-    # LIMITA 
-    df_freq = df_freq.head(100)
 
-    # EFICIENTE
+  
+    df_freq = df_freq.head(100)
     freq_dict = dict(zip(df_freq['palavra'], df_freq['freq']))
 
     wordcloud = WordCloud(

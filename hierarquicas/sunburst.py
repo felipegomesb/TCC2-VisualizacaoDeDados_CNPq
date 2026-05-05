@@ -26,5 +26,5 @@ fig.update_traces(
     hovertemplate='<b>%{label}</b><br>Valor: R$ %{value:,.2f}<extra></extra>'
 )
 
-#fig.write_html("resultados/sunburst/sunburst_areasDoConhecimento.html")
+fig.write_html("resultados/hierarquicos/sunburst_areasDoConhecimento.html")
 fig.show()

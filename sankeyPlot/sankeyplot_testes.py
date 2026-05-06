@@ -232,16 +232,15 @@ def agrupar_ano(ano):
 
      ano = int(ano)
 
-     if 2004 <= ano <= 2011:
-         return '2004-2011'
-     elif 2012 <= ano <= 2016:
-         return '2012-2016'
-     elif 2017 <= ano <= 2020:
-         return '2017-2020'
-     elif 2021 <= ano <= 2024:
-         return '2021-2024'
+     if 2004 <= ano <= 2010:
+         return '2004-2010'
+     elif 2011 <= ano <= 2017:
+         return '2011-2017'
+     elif 2018 <= ano <= 2024:
+         return '2018-2024'
      else:
          return 'Fora do recorte'
+
 
 
     
@@ -301,7 +300,7 @@ value_all = df_grouped['total'].astype(float)
 fig.add_trace(go.Sankey(
     node=dict(label=labels_all),
     link=dict(source=source_all, target=target_all, value=value_all),
-    visible=True  # começa mostrando tudo
+    visible=True  
 ))
 
 labels = list(pd.concat([
@@ -336,7 +335,7 @@ fig = go.Figure()
 fig.add_trace(go.Sankey(
     node=dict(label=labels),
     link=dict(source=source, target=target, value=value),
-    visible=True
+    visible=True,
 ))
 
 grandes_areas = df_grouped['grande_area'].drop_duplicates().tolist()
@@ -374,6 +373,6 @@ for i, ga in enumerate(grandes_areas):
 
 fig.update_layout(title='Grande Área → Categoria → Ano', updatemenus=[dict(buttons=buttons, direction='down', showactive=True, x=0.0, y=1.1)])
 
-#fig.show()
-fig.write_html('resultados/sankey/sankeyplot_button_modalidades.html')
+fig.show()
+#fig.write_html('resultados/sankey/sankeyplot_button_modalidades.html')
 

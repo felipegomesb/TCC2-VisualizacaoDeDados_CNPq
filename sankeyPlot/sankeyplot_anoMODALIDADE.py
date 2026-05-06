@@ -232,16 +232,15 @@ def agrupar_ano(ano):
 
      ano = int(ano)
 
-     if 2004 <= ano <= 2011:
-         return '2004-2011'
-     elif 2012 <= ano <= 2016:
-         return '2012-2016'
-     elif 2017 <= ano <= 2020:
-         return '2017-2020'
-     elif 2021 <= ano <= 2024:
-         return '2021-2024'
+     if 2004 <= ano <= 2010:
+         return '2004-2010'
+     elif 2011 <= ano <= 2017:
+         return '2011-2017'
+     elif 2017 <= ano <= 2024:
+         return '2017-2024'
      else:
          return 'Fora do recorte'
+
 
 
     
@@ -374,6 +373,6 @@ for i, categoria in enumerate(categorias):
 
 fig.update_layout(title='Grande Área → Categoria → Ano', updatemenus=[dict(buttons=buttons, direction='down', showactive=True, x=0.0, y=1.1)])
 
-fig.show()
-#fig.write_html('resultados/sankey/sankeyplot_button_categoria.html')
+#fig.show()
+fig.write_html('resultados/sankey/sankeyplot_button_categoria.html')
 

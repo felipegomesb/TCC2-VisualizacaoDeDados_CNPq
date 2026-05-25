@@ -5,7 +5,7 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "dados/mapa_internacional_melhorado.txt"
+ARQUIVO = "dados/coropletico_internacional.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional.html"
 ANIMAR_POR_ANO = True
 ESCALA_MILHOES = True
@@ -162,7 +162,7 @@ def extrair_iso3(valor_pais: str) -> str | None:
 
 
 def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
-    df = pd.read_csv(caminho_arquivo)
+    df = pd.read_parquet(caminho_arquivo)
     df.columns = df.columns.str.strip().str.lower()
 
     required = {"ano", "pais", "total"}

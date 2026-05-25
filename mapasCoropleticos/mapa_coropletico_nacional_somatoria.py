@@ -9,7 +9,7 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "dados/mapa_geografico.txt"
+ARQUIVO = "dados/coropletico_nacional.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.html"
 ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.png"
 ARQUIVO_SAIDA_HTML_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.html"
@@ -21,7 +21,7 @@ ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True
 
 
-UF_TO_STATE = {
+sigla_uf_destino_TO_STATE = {
 	"AC": "Acre",
 	"AL": "Alagoas",
 	"AP": "Amapa",
@@ -51,7 +51,7 @@ UF_TO_STATE = {
 	"TO": "Tocantins",
 }
 
-UF_TO_POP = {
+sigla_uf_destino_TO_POP = {
 	"AC": 830018,
 	"AL": 3125254,
 	"AP": 733759,
@@ -87,24 +87,24 @@ def normalizar(texto: str) -> str:
 
 
 def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
-	df = pd.read_csv(caminho_arquivo)
+	df = pd.read_parquet(caminho_arquivo)
 	df.columns = df.columns.str.strip().str.lower()
 
-	required = {"ano", "uf", "total"}
+	required = {"ano", "sigla_uf_destino", "valor_total"}
 	missing = required.difference(df.columns)
 	if missing:
 		raise ValueError(f"Colunas ausentes: {missing}")
 
 	df["ano"] = pd.to_numeric(df["ano"], errors="coerce")
-	df["total"] = pd.to_numeric(df["total"], errors="coerce")
-	df["uf"] = df["uf"].astype(str).str.upper().str.strip()
+	df["valor_total"] = pd.to_numeric(df["valor_total"], errors="coerce")
+	df["sigla_uf_destino"] = df["sigla_uf_destino"].astype(str).str.upper().str.strip()
 
-	df = df.dropna(subset=["ano", "uf", "total"])
+	df = df.dropna(subset=["ano", "sigla_uf_destino", "valor_total"])
 	df["ano"] = df["ano"].astype(int)
 	df = df[df["ano"].between(1900, 2100)]
 
-	df = df[df["uf"].isin(UF_TO_STATE.keys())]
-	df = df.groupby("uf", as_index=False)["total"].sum()
+	df = df[df["sigla_uf_destino"].isin(sigla_uf_destino_TO_STATE.keys())]
+	df = df.groupby("sigla_uf_destino", as_index=False)["valor_total"].sum()
 	return df
 
 
@@ -112,7 +112,7 @@ def carregar_geojson(url: str) -> dict:
 	with urlopen(url) as response:
 		geojson = json.load(response)
 
-	# Normaliza nomes para casar com os nomes mapeados das UFs.
+	# Normaliza nomes para casar com os nomes mapeados das sigla_uf_destinos.
 	for feature in geojson["features"]:
 		nome = feature["properties"]["name"]
 		feature["properties"]["name"] = normalizar(nome)
@@ -121,14 +121,14 @@ def carregar_geojson(url: str) -> dict:
 
 
 def preparar_visualizacao(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
-	df["estado_nome"] = df["uf"].map(UF_TO_STATE).apply(normalizar)
+	df["estado_nome"] = df["sigla_uf_destino"].map(sigla_uf_destino_TO_STATE).apply(normalizar)
 
 	if ESCALA_MILHOES:
-		df["valor_plot"] = df["total"] / 1_000_000
-		label = "Valor total (R$ milhoes)"
+		df["valor_plot"] = df["valor_total"] / 1_000_000
+		label = "Valor valor_total (R$ milhoes)"
 	else:
-		df["valor_plot"] = df["total"]
-		label = "Valor total"
+		df["valor_plot"] = df["valor_total"]
+		label = "Valor valor_total"
 
 	if USAR_ESCALA_LOG:
 		df["valor_plot"] = np.log1p(df["valor_plot"])
@@ -139,9 +139,9 @@ def preparar_visualizacao(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 
 def preparar_visualizacao_100mil_hab(df: pd.DataFrame) -> tuple[pd.DataFrame, str]:
 	df_per_capita = df.copy()
-	df_per_capita["populacao"] = df_per_capita["uf"].map(UF_TO_POP)
+	df_per_capita["populacao"] = df_per_capita["sigla_uf_destino"].map(sigla_uf_destino_TO_POP)
 	df_per_capita = df_per_capita.dropna(subset=["populacao"])
-	df_per_capita["valor_plot"] = (df_per_capita["total"] / df_per_capita["populacao"]) * 100_000
+	df_per_capita["valor_plot"] = (df_per_capita["valor_total"] / df_per_capita["populacao"]) * 100_000
 	label = "Valor por 100 mil habitantes (R$)"
 
 	if USAR_ESCALA_LOG:
@@ -159,7 +159,7 @@ def criar_figura(df: pd.DataFrame, geojson: dict, label: str):
 		featureidkey="properties.name",
 		color="valor_plot",
 		color_continuous_scale="YlOrRd",
-		hover_name="uf",
+		hover_name="sigla_uf_destino",
 		hover_data={"estado_nome": False, "valor_plot": ":,.2f"},
 		title="Mapa Coropletico Nacional - Soma de Todos os Anos",
 		labels={"valor_plot": "Valor"},
@@ -181,7 +181,7 @@ def criar_figura_100mil_hab(df: pd.DataFrame, geojson: dict, label: str):
 		featureidkey="properties.name",
 		color="valor_plot",
 		color_continuous_scale="YlOrRd",
-		hover_name="uf",
+		hover_name="sigla_uf_destino",
 		hover_data={"estado_nome": False, "valor_plot": ":,.2f", "populacao": ":,.0f"},
 		title="Mapa Coropletico Nacional - Soma de Todos os Anos (normalizado por 100 mil hab)",
 		labels={"valor_plot": "Valor"},
@@ -205,15 +205,15 @@ def main():
 	df_100mil, label_100mil = preparar_visualizacao_100mil_hab(df)
 	fig_100mil = criar_figura_100mil_hab(df_100mil, geojson, label_100mil)
 
-	top10 = df.nlargest(27, "total")
-	print("Top 27 estados por investimento total:")
-	print(top10[["uf", "total"]].to_string(formatters={"total": "R$ {:,.2f}".format}))
+	top10 = df.nlargest(27, "valor_total")
+	print("Top 27 estados por investimento valor_total:")
+	print(top10[["sigla_uf_destino", "valor_total"]].to_string(formatters={"valor_total": "R$ {:,.2f}".format}))
 
 	fig.show()
-	fig.write_html(ARQUIVO_SAIDA_HTML)
-	fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
-	fig_100mil.write_html(ARQUIVO_SAIDA_HTML_100MIL)
-	fig_100mil.write_image(ARQUIVO_SAIDA_PNG_100MIL, width=1200, height=800, scale=2)
+	#fig.write_html(ARQUIVO_SAIDA_HTML)
+	#fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
+	#fig_100mil.write_html(ARQUIVO_SAIDA_HTML_100MIL)
+	#fig_100mil.write_image(ARQUIVO_SAIDA_PNG_100MIL, width=1200, height=800, scale=2)
 	fig_100mil.show()
 
 

@@ -8,7 +8,7 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "dados/mapa_geografico.txt"
+ARQUIVO = "dados\coropletico_nacional.parquet"
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 ARQUIVO_SAIDA_ABSOLUTO = "resultados/mapas_coropleticos/mapa_coropletico.html"
 ARQUIVO_SAIDA_PER_CAPITA = "resultados/mapas_coropleticos/mapa_coropletico_por_100mil_hab.html"

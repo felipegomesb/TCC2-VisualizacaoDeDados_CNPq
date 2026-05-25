@@ -143,11 +143,11 @@ ISO3_FIX = {
 
 
 # FUNÇÕES
-def extrair_iso3(valor_pais: str) -> str | None:
-    if pd.isna(valor_pais):
+def extrair_iso3(valor_pais_destino: str) -> str | None:
+    if pd.isna(valor_pais_destino):
         return None
 
-    texto = str(valor_pais).strip().upper()
+    texto = str(valor_pais_destino).strip().upper()
 
     if not texto or "NAO INFORMADA" in texto:
         return None
@@ -165,36 +165,36 @@ def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
     df = pd.read_parquet(caminho_arquivo)
     df.columns = df.columns.str.strip().str.lower()
 
-    required = {"ano", "pais", "total"}
+    required = {"ano", "pais_destino", "valor_total"}
     missing = required.difference(df.columns)
     if missing:
         raise ValueError(f"Colunas ausentes: {missing}")
 
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce")
-    df["total"] = pd.to_numeric(df["total"], errors="coerce")
-    df["iso_alpha"] = df["pais"].apply(extrair_iso3)
+    df["valor_total"] = pd.to_numeric(df["valor_total"], errors="coerce")
+    df["iso_alpha"] = df["pais_destino"].apply(extrair_iso3)
 
-    df = df.dropna(subset=["ano", "total", "iso_alpha"])
+    df = df.dropna(subset=["ano", "valor_total", "iso_alpha"])
     df["ano"] = df["ano"].astype(int)
 
     # remove anos irregulares
     df = df[df["ano"].between(1900, 2100)]
 
     # agrega
-    df = df.groupby(["ano", "iso_alpha"], as_index=False)["total"].sum()
+    df = df.groupby(["ano", "iso_alpha"], as_index=False)["valor_total"].sum()
 
     return df
 
 
 def preparar_visualizacao(df: pd.DataFrame) -> pd.DataFrame:
-    df["pais_nome"] = df["iso_alpha"]
+    df["pais_destino_nome"] = df["iso_alpha"]
 
     # escala
     if ESCALA_MILHOES:
-        df["valor_plot"] = df["total"] / 1_000_000
+        df["valor_plot"] = df["valor_total"] / 1_000_000
         label = "Valor (R$ milhões)"
     else:
-        df["valor_plot"] = df["total"]
+        df["valor_plot"] = df["valor_total"]
         label = "Valor"
 
 
@@ -216,7 +216,7 @@ def criar_figura(df: pd.DataFrame):
         animation_frame="ano" if ANIMAR_POR_ANO else None,
         color_continuous_scale="YlOrRd",
         projection="natural earth",
-        hover_name="pais_nome",
+        hover_name="pais_destino_nome",
         hover_data={
             "valor_plot": ":,.2f",
             "ano": True,
@@ -242,7 +242,7 @@ def main():
     fig = criar_figura(df)
 
     fig.show()
-    #fig.write_html(ARQUIVO_SAIDA_HTML)
+    fig.write_html(ARQUIVO_SAIDA_HTML)
 
 
 

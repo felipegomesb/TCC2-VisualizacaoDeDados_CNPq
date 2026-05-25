@@ -373,6 +373,6 @@ for i, ga in enumerate(grandes_areas):
 
 fig.update_layout(title='Grande Área → Categoria → Ano', updatemenus=[dict(buttons=buttons, direction='down', showactive=True, x=0.0, y=1.1)])
 
-fig.show()
-#fig.write_html('resultados/sankey/sankeyplot_button_modalidades.html')
+#fig.show()
+fig.write_html('resultados/sankey/sankeyplot_button_modalidades.html')
 

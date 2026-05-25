@@ -4,7 +4,7 @@ import pandas as pd
 
 # ================= CONFIG =================
 ARQUIVO_ENTRADA = 'dados/cnpqBolsasCompleto.parquet'
-ARQUIVO_AGREGADO = 'dados/coropletico_internacional.parquet'
+ARQUIVO_AGREGADO = 'dados/coropletico_internacional_GA.parquet'
 
 
 # ================= FUNÇÃO DE LIMPEZA =================

@@ -8,7 +8,7 @@ import plotly.express as px
 
 
 # CONFIG
-ARQUIVO = "dados\coropletico_nacional.parquet"
+ARQUIVO = "dados/coropletico_nacional.parquet"
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 ARQUIVO_SAIDA_ABSOLUTO = "resultados/mapas_coropleticos/mapa_coropletico.html"
 ARQUIVO_SAIDA_PER_CAPITA = "resultados/mapas_coropleticos/mapa_coropletico_por_100mil_hab.html"
@@ -21,24 +21,24 @@ def normalizar(texto: str) -> str:
 
 
 def carregar_dados(caminho_arquivo: str) -> pd.DataFrame:
-    df = pd.read_csv(caminho_arquivo)
+    df = pd.read_parquet(caminho_arquivo)
 
     # padronizar colunas
     df.columns = df.columns.str.strip().str.lower()
 
     # validar
-    required = {"ano", "uf", "total"}
+    required = {"ano", "sigla_uf_destino", "valor_total"}
     missing = required.difference(df.columns)
     if missing:
         raise ValueError(f"Colunas ausentes: {missing}")
 
     # tipos
     df["ano"] = pd.to_numeric(df["ano"], errors="coerce")
-    df["total"] = pd.to_numeric(df["total"], errors="coerce")
-    df["uf"] = df["uf"].astype(str).str.upper().str.strip()
+    df["valor_total"] = pd.to_numeric(df["valor_total"], errors="coerce")
+    df["sigla_uf_destino"] = df["sigla_uf_destino"].astype(str).str.upper().str.strip()
 
     # limpar
-    df = df.dropna(subset=["ano", "uf", "total"])
+    df = df.dropna(subset=["ano", "sigla_uf_destino", "valor_total"])
     df["ano"] = df["ano"].astype(int)
 
     return df
@@ -61,8 +61,8 @@ def main():
     geojson = carregar_geojson(GEOJSON_URL)
 
     
-    # MAPEAR UF → NOME ESTADO
-    UF_TO_STATE = {
+    # MAPEAR sigla_UF_destino → NOME ESTADO
+    sigla_UF_destino_TO_STATE = {
         "AC": "Acre",
         "AL": "Alagoas",
         "AP": "Amapa",
@@ -92,8 +92,8 @@ def main():
         "TO": "Tocantins",
     }
 
-    # Populacao residente por UF (Censo 2022/IBGE, aproximado para normalizacao)
-    UF_TO_POP = {
+    # Populacao residente por sigla_UF_destino (Censo 2022/IBGE, aproximado para normalizacao)
+    sigla_UF_destino_TO_POP = {
         "AC": 830018,
         "AL": 3125254,
         "AP": 733759,
@@ -123,7 +123,7 @@ def main():
         "TO": 1511460,
     }
 
-    df["estado_nome"] = df["uf"].map(UF_TO_STATE)
+    df["estado_nome"] = df["sigla_uf_destino"].map(sigla_UF_destino_TO_STATE)
     df = df.dropna(subset=["estado_nome"])
 
     # normalizar nomes
@@ -131,13 +131,13 @@ def main():
 
     
     # AGRUPAR 
-    df = df.groupby(["ano", "estado_nome", "uf"], as_index=False)["total"].sum()
+    df = df.groupby(["ano", "estado_nome", "sigla_uf_destino"], as_index=False)["valor_total"].sum()
 
     
     # MELHORAR ESCALA 
-    df["total_milhoes"] = df["total"] / 1_000_000 # POR MILHOES
-    df["populacao"] = df["uf"].map(UF_TO_POP)
-    df["total_por_100mil_hab"] = (df["total"] / df["populacao"]) * 100_000
+    df["valor_total_milhoes"] = df["valor_total"] / 1_000_000 # POR MILHOES
+    df["populacao"] = df["sigla_uf_destino"].map(sigla_UF_destino_TO_POP)
+    df["valor_total_por_100mil_hab"] = (df["valor_total"] / df["populacao"]) * 100_000
 
     
     # MAPA
@@ -146,13 +146,13 @@ def main():
         geojson=geojson,
         locations="estado_nome",
         featureidkey="properties.name",
-        color="total_milhoes",
+        color="valor_total_milhoes",
         animation_frame="ano",
-        hover_name="uf",
-        hover_data={"estado_nome": False, "total_milhoes": ":,.2f"},
+        hover_name="sigla_uf_destino",
+        hover_data={"estado_nome": False, "valor_total_milhoes": ":,.2f"},
         color_continuous_scale="YlOrRd",
         title="Investimento do CNPq por Estado ao Longo dos Anos",
-        labels={"total_milhoes": "R$ (milhões)"},
+        labels={"valor_total_milhoes": "R$ (milhões)"},
     )
 
     fig.update_geos(fitbounds="locations", visible=False)
@@ -166,13 +166,13 @@ def main():
         geojson=geojson,
         locations="estado_nome",
         featureidkey="properties.name",
-        color="total_por_100mil_hab",
+        color="valor_total_por_100mil_hab",
         animation_frame="ano",
-        hover_name="uf",
-        hover_data={"estado_nome": False, "total_por_100mil_hab": ":,.2f", "populacao": ":,.0f"},
+        hover_name="sigla_uf_destino",
+        hover_data={"estado_nome": False, "valor_total_por_100mil_hab": ":,.2f", "populacao": ":,.0f"},
         color_continuous_scale="YlOrRd",
         title="Investimento do CNPq por Estado (normalizado por 100 mil habitantes)",
-        labels={"total_por_100mil_hab": "R$ por 100 mil hab"},
+        labels={"valor_total_por_100mil_hab": "R$ por 100 mil hab"},
     )
 
     fig_per_capita.update_geos(fitbounds="locations", visible=False)

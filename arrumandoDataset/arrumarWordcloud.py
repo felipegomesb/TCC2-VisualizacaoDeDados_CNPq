@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 # ================= CONFIG =================
-ARQUIVO_ENTRADA = 'dados/cnpqTcc.parquet'
+ARQUIVO_ENTRADA = 'dados/cnpqBolsasCompleto.parquet'
 
 # ================= LOAD =================
 df = pd.read_parquet(ARQUIVO_ENTRADA)

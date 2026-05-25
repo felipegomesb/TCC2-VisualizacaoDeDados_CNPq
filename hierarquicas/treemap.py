@@ -12,10 +12,10 @@ import plotly.express as px
 import pandas as pd
 
 #config
-ARQUIVO = 'dados/treemap_pronto.csv'
+ARQUIVO = 'dados/treemap_pronto.parquet'
 
 #leitura do arquivo
-df = pd.read_csv(ARQUIVO)
+df = pd.read_parquet(ARQUIVO)
 df['total'] = pd.to_numeric(df['total'], errors='coerce')
 df = df.fillna('Não informado')
 #criando o gráfico "grande_area","area","subarea","valor"

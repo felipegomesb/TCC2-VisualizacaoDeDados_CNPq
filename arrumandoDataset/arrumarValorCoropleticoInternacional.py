@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 # ================= CONFIG =================
-ARQUIVO_ENTRADA = 'dados/cnpqTcc.parquet'
+ARQUIVO_ENTRADA = 'dados/cnpqBolsasCompleto.parquet'
 ARQUIVO_AGREGADO = 'dados/coropletico_internacional.parquet'
 
 

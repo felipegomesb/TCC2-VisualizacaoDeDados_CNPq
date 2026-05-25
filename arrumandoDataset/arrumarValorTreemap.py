@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 
 # ================= CONFIG =================
-ARQUIVO_ENTRADA = 'dados/cnpqTcc.txt'
-ARQUIVO_LIMPO = 'dados/cnpqTcc_limpo.csv'
-ARQUIVO_AGREGADO = 'dados/treemap_pronto.csv'
+ARQUIVO_ENTRADA = 'dados/cnpqBolsasCompleto.parquet'
+ARQUIVO_LIMPO = 'dados/cnpqTcc_limpo.parquet'
+ARQUIVO_AGREGADO = 'dados/treemap_pronto.parquet'
 
 
 # ================= FUNÇÃO DE LIMPEZA =================
@@ -42,7 +42,7 @@ def parse_valor(valor):
 
 
 # ================= LOAD =================
-df = pd.read_csv(ARQUIVO_ENTRADA)
+df = pd.read_parquet(ARQUIVO_ENTRADA)
 
 print("Linhas carregadas:", len(df))
 
@@ -70,7 +70,7 @@ df['total'] = df['valor_numeric']
 
 
 # ================= SALVA LIMPO =================
-#df.to_csv(ARQUIVO_LIMPO, index=False)
+#df.to_parquet(ARQUIVO_LIMPO, index=False)
 #print(f"\nArquivo limpo salvo em: {ARQUIVO_LIMPO}")
 
 
@@ -83,7 +83,7 @@ df_grouped = (
     .reset_index()
 )
 
-df_grouped.to_csv(ARQUIVO_AGREGADO, index=False)
+df_grouped.to_parquet(ARQUIVO_AGREGADO, index=False)
 print(f"Arquivo agregado salvo em: {ARQUIVO_AGREGADO}")
 
 

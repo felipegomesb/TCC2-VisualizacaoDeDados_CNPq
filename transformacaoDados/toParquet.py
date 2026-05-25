@@ -83,7 +83,6 @@ cols_para_excluir = [
     'cpf',
     'nome_chamada',
     'beneficiario',
-    'processo',
     'data_inicio_processo',
     'data_termino_processo',
     'categoria_nivel',

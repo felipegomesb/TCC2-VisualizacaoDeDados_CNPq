@@ -20,17 +20,18 @@ df = df.rename(columns={"grande_area": "Grande_Area"})
 
 df["ano_referencia"] = pd.to_numeric(df["ano_referencia"], errors="coerce")
 df["total"] = pd.to_numeric(df["total"], errors="coerce")
-
+#print(df[df["ano_referencia"] == 2020].head())
 df = df.dropna(subset=["ano_referencia", "Grande_Area", "total"])
 df["ano_referencia"] = df["ano_referencia"].astype(int)
 df = df[df["ano_referencia"].between(ano_referencia_INICIO, ano_referencia_FIM)]
+#print(df[df["ano_referencia"] == 2020].head())
 
 
 # AGRUPAR (resolve duplicatas)
 
 df_grouped = df.groupby(["ano_referencia", "Grande_Area"], as_index=False)["total"].sum()
 
-
+#print(df_grouped[df_grouped["ano_referencia"] == 2020].head())
 # FILTRAR TOP ÁREAS
 
 top = df_grouped.groupby("Grande_Area")["total"].sum().nlargest(TOP_N).index
@@ -55,6 +56,7 @@ else:
         .fillna(0)
         .sort_index()
     )
+    print(2020 in pivot.index)
 
     x = pivot.index.to_numpy()
     y = pivot.to_numpy().T
@@ -97,15 +99,20 @@ else:
 
         cumulative = upper
 
-    fig.update_layout(
-        title="Investimento por Grande Área (Interativo - Wobbly)",
-        xaxis_title="ano_referencia",
-        yaxis_title="Valor Pago",
-        hovermode="x unified"
-    )
+        fig.update_layout(
+            title="Investimento por Grande Área (Interativo - Wobbly)",
+            xaxis_title="ano_referencia",
+            yaxis_title="Valor Pago",
+            hovermode="x unified"
+        )
+
+        fig.update_xaxes(
+            tickmode='linear',
+            dtick=1
+        )
 
 fig.show()
-#fig.write_html("resultados/streamgraph/streamgraph_grande_area_interativo.html")
+fig.write_html("resultados/streamgraph/streamgraph_grande_area_interativo.html")
 
 #usando kaleido para salvar imagem estática
 #fig = go.Figure(fig)

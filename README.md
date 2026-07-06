@@ -44,7 +44,6 @@ Evolução temporal dos valores concedidos por grande área do conhecimento.
 
 | Visualização | Descrição |
 |---|---|
-| Streamgraph — grande área (estático) | Evolução temporal empilhada dos valores por grande área (imagem estática, sem versão HTML interativa) |
 | [Streamgraph — grande área (interativo)](https://felipegomesb.github.io/TCC2-VisualizacaoDeDados_CNPq/resultados/streamgraph/streamgraph_grande_area_interativo.html) | Mesma visualização, com filtros e interações habilitadas |
 
 ### ☁️ Nuvens de Palavras

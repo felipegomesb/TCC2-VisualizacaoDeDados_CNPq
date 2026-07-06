@@ -108,9 +108,9 @@ print("Total original :", total_original)
 print("Total agregado :", total_agregado)
 
 if abs(total_original - total_agregado) < 1:
-    print("✅ Tudo consistente!")
+    print("Tudo consistente!")
 else:
-    print("❌ Diferença encontrada!")
+    print("Diferença encontrada!")
 
 # ================= AMOSTRA =================
 print("\n===== HEAD =====")

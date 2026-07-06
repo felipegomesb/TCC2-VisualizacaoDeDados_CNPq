@@ -6,7 +6,7 @@ import pandas as pd
 ARQUIVO_ENTRADA = 'dados/cnpqBolsasCompleto.parquet'
 ARQUIVO_LIMPO = 'dados/cnpqTcc_limpo.parquet'
 ARQUIVO_AGREGADO = 'dados/treemap_pronto.parquet'
-
+ARUIVO_AGREGADO_CSV = 'dados/treemap_pronto.csv'
 
 # ================= FUNÇÃO DE LIMPEZA =================
 def parse_valor(valor):
@@ -84,6 +84,8 @@ df_grouped = (
 )
 
 df_grouped.to_parquet(ARQUIVO_AGREGADO, index=False)
+df_grouped.to_csv(ARUIVO_AGREGADO_CSV, index=False) 
+
 print(f"Arquivo agregado salvo em: {ARQUIVO_AGREGADO}")
 
 

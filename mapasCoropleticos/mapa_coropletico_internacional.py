@@ -7,6 +7,7 @@ import plotly.express as px
 # CONFIG
 ARQUIVO = "dados/coropletico_internacional.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional.html"
+ARQUIVO_SAIDA_SVG = "resultados/mapas_coropleticos/mapa_coropletico_internacional.svg"
 ANIMAR_POR_ANO = True
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True
@@ -241,8 +242,9 @@ def main():
 
     fig = criar_figura(df)
 
-    fig.show()
-    fig.write_html(ARQUIVO_SAIDA_HTML)
+    #fig.show()
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
+    fig.write_image(ARQUIVO_SAIDA_SVG)
 
 
 

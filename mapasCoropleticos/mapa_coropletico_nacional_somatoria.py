@@ -11,9 +11,9 @@ import plotly.express as px
 # CONFIG
 ARQUIVO = "dados/coropletico_nacional.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.html"
-#ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.png"
+ARQUIVO_SAIDA_SVG = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado.svg"
 ARQUIVO_SAIDA_HTML_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.html"
-#ARQUIVO_SAIDA_PNG_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.png"
+ARQUIVO_SAIDA_SVG_100MIL = "resultados/mapas_coropleticos/mapa_coropletico_nacional_somado_100milhab.svg"
 
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 
@@ -209,12 +209,12 @@ def main():
 	print("Top 27 estados por investimento valor_total:")
 	print(top10[["sigla_uf_destino", "valor_total"]].to_string(formatters={"valor_total": "R$ {:,.2f}".format}))
 
-	fig.show()
-	fig.write_html(ARQUIVO_SAIDA_HTML)
-	#fig.write_image(ARQUIVO_SAIDA_PNG, width=1200, height=800, scale=2)
-	fig_100mil.write_html(ARQUIVO_SAIDA_HTML_100MIL)
-	#fig_100mil.write_image(ARQUIVO_SAIDA_PNG_100MIL, width=1200, height=800, scale=2)
-	fig_100mil.show()
+	#fig.show()
+	#fig.write_html(ARQUIVO_SAIDA_HTML)
+	fig.write_image(ARQUIVO_SAIDA_SVG, width=1200, height=800, scale=2)
+	#fig_100mil.write_html(ARQUIVO_SAIDA_HTML_100MIL)
+	fig_100mil.write_image(ARQUIVO_SAIDA_SVG_100MIL, width=1200, height=800, scale=2)
+	#fig_100mil.show()
 
 
 

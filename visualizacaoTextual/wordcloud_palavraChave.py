@@ -340,4 +340,11 @@ fig_wc_final.write_html(
     include_plotlyjs='cdn'
 )
 
+fig_wc_final.write_image(
+    "resultados/visualizacao_textual/wordcloud_palavraChave_botoes.svg",
+    width=1200,
+    height=800,
+    scale=2
+)
+
 print('\nHTML salvo com sucesso!')

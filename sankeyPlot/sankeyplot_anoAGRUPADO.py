@@ -336,4 +336,5 @@ fig.update_layout(title="Grande Área → Categoria → Ano")
 
 #fig.show()
 fig.write_html("resultados/sankey/sankeyplot_modalidades_ano.html")
+fig.write_image("resultados/sankey/sankeyplot_modalidades_ano.svg", width=1200, height=800, scale=2)
 

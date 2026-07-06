@@ -12,7 +12,8 @@ ARQUIVO = "dados/coropletico_nacional.parquet"
 GEOJSON_URL = "https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson"
 ARQUIVO_SAIDA_ABSOLUTO = "resultados/mapas_coropleticos/mapa_coropletico.html"
 ARQUIVO_SAIDA_PER_CAPITA = "resultados/mapas_coropleticos/mapa_coropletico_por_100mil_hab.html"
-
+ARQUIVO_SAIDA_SVG_ABSOLUTO = "resultados/mapas_coropleticos/mapa_coropletico.svg"
+ARQUIVO_SAIDA_SVG_PER_CAPITA = "resultados/mapas_coropleticos/mapa_coropletico_por_100mil_hab.svg"
 
 
 # FUNÇÕES
@@ -183,10 +184,13 @@ def main():
 
     
     #fig.show()
-    fig.write_html(ARQUIVO_SAIDA_ABSOLUTO)
-    fig_per_capita.write_html(ARQUIVO_SAIDA_PER_CAPITA)
-    fig_per_capita.show()
+    #fig.write_html(ARQUIVO_SAIDA_ABSOLUTO)
+    #fig_per_capita.write_html(ARQUIVO_SAIDA_PER_CAPITA)
+    #fig_per_capita.show()
 
+    fig.write_image(ARQUIVO_SAIDA_SVG_ABSOLUTO, width=1200, height=800, scale=2)
+    fig_per_capita.write_image(ARQUIVO_SAIDA_SVG_PER_CAPITA, width=1200, height=800, scale=2)
+    
     
 
 

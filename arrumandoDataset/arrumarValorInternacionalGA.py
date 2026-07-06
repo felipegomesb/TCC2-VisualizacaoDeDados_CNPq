@@ -82,9 +82,9 @@ print("Total original:", df['total'].sum())
 print("Total agregado:", df_grouped['total'].sum())
 
 if abs(df['total'].sum() - df_grouped['total'].sum()) < 1:
-    print("✅ Tudo consistente!")
+    print("Tudo consistente!")
 else:
-    print("❌ Diferença encontrada!")
+    print("Diferença encontrada!")
 
 
 # ================= OUTPUT =================

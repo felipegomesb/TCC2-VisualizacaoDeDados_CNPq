@@ -129,9 +129,9 @@ consistente_12 = np.isclose(total_df1, total_df2, rtol=0, atol=1)
 consistente_13 = np.isclose(total_df1, total_df3, rtol=0, atol=1)
 
 if consistente_12 and consistente_13:
-    print("✅ Tudo consistente entre txt, csv e parquet!")
+    print("Tudo consistente entre txt, csv e parquet!")
 else:
-    print("❌ Tem diferença nos totais!")
+    print("Tem diferença nos totais!")
     print("Diferença txt - csv:", total_df1 - total_df2)
     print("Diferença txt - parquet:", total_df1 - total_df3)
 

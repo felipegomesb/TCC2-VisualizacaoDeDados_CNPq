@@ -26,5 +26,6 @@ fig.update_traces(
     hovertemplate='<b>%{label}</b><br>Valor: R$ %{value:,.2f}<extra></extra>'
 )
 
-fig.write_html("resultados/hierarquicos/treemap_areasDoConhecimento.html")
-fig.show()
+#fig.write_html("resultados/hierarquicos/treemap_areasDoConhecimento.html")
+fig.write_image("resultados/hierarquicos/treemap_areasDoConhecimento.svg")
+#fig.show()

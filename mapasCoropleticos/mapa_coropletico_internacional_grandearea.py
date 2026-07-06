@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 # CONFIG
 ARQUIVO = "dados/coropletico_internacional_GA.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional_grandearea.html"
-#ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_grandearea.png"
+ARQUIVO_SAIDA_SVG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_grandearea.svg"
 
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True
@@ -331,9 +331,9 @@ def main():
         )]
     )
 
-    fig.show()
-    fig.write_html(ARQUIVO_SAIDA_HTML)
-
+    #fig.show()
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
+    fig.write_image(ARQUIVO_SAIDA_SVG)
 
 if __name__ == "__main__":
     main()

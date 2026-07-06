@@ -9,7 +9,7 @@ import plotly.express as px
 # CONFIG
 ARQUIVO = "dados/coropletico_internacional.parquet"
 ARQUIVO_SAIDA_HTML = "resultados/mapas_coropleticos/mapa_coropletico_internacional_somado.html"
-ARQUIVO_SAIDA_PNG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_somado.png"
+ARQUIVO_SAIDA_SVG = "resultados/mapas_coropleticos/mapa_coropletico_internacional_somado.svg"
 
 ESCALA_MILHOES = True
 USAR_ESCALA_LOG = True
@@ -222,8 +222,8 @@ def main():
     df, label = preparar_visualizacao(df)
     fig = criar_figura(df, label)
 
-    fig.show()
-    fig.write_html(ARQUIVO_SAIDA_HTML)
+    #fig.show()
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
 
     # top 10 países
     top10 = df.nlargest(10, "valor_total")
@@ -231,7 +231,7 @@ def main():
     print(top10[["iso_alpha", "valor_total"]].to_string(formatters={"valor_total": "R$ {:,.2f}".format}))
 
     try:
-        fig.write_image(ARQUIVO_SAIDA_PNG, width=1400, height=800, scale=2)
+        fig.write_image(ARQUIVO_SAIDA_SVG, width=1400, height=800, scale=2)
     except Exception:
         pass
 

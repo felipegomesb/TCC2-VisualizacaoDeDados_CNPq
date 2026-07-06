@@ -21,6 +21,11 @@ GEOJSON_URL = (
     "public/data/brazil-states.geojson"
 )
 
+ARQUIVO_SAIDA_SVG = (
+    "resultados/mapas_coropleticos/"
+    "mapa_coropletico_nacional_grandearea_dominante.svg"
+)
+
 UF_COL = "sigla_uf_destino"
 
 
@@ -294,16 +299,14 @@ def main():
         )
     )
 
-    fig.show()
-
-    fig.write_html(
-        ARQUIVO_SAIDA_HTML
-    )
-
-    print(
-        f"\nHTML salvo em:\n"
-        f"{ARQUIVO_SAIDA_HTML}"
-    )
+    #fig.show()
+    #fig.write_html(ARQUIVO_SAIDA_HTML)
+    fig.write_image(ARQUIVO_SAIDA_SVG, width=1400, height=800, scale=2)
+    
+    #print(
+    #    f"\nHTML salvo em:\n"
+    #    f"{ARQUIVO_SAIDA_HTML}"
+    #)
 
 
 if __name__ == "__main__":
